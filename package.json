@@ -1,0 +1,36 @@
+{
+	"name": "pi-git-tools",
+	"version": "0.1.0",
+	"description": "Git and GitHub CLI tools for the pi coding agent — provides typed, safe git and gh operations for agent tool use",
+	"type": "module",
+	"main": "./src/index.ts",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"files": [
+		"src/"
+	],
+	"pi": {
+		"extensions": [
+			"./src/index.ts"
+		]
+	},
+	"scripts": {
+		"check": "biome check",
+		"format": "biome format --write",
+		"lint": "biome lint",
+		"typecheck": "tsc --noEmit",
+		"test": "npx tsx --test test/unit/*.test.mjs test/tools/git/*.test.mjs test/tools/gh/*.test.mjs",
+		"test:smoke": "node test/smoke.mjs",
+		"precommit": "npm run typecheck && npm run check && npm run test"
+	},
+	"peerDependencies": {
+		"typebox": "*"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.6",
+		"@earendil-works/pi-coding-agent": "^0.82.1",
+		"tsx": "^4.20.3",
+		"typescript": "^6.0.3"
+	}
+}
