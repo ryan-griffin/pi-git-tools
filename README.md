@@ -90,6 +90,15 @@ Environment variables:
 | `PI_GIT_TOOLS_TIMEOUT_MS` | `600000` (10 min) | Per-command timeout in milliseconds. Invalid, zero, negative, or non-integer values use the default.                                                                                                  |
 | `PI_GIT_TOOLS_ACTIVE`     | unset             | Comma-separated tool/group names to keep active from session start (`git-advanced`, `gh`, specific tool names, or `all`). Default: 17 core git tools active; the rare-git and GitHub groups are lazy. |
 
+## Output truncation
+
+All tool results are truncated to **2000 lines or 50 KB** (whichever is hit first), per pi's output contract for custom tools:
+
+- The full output is saved to a temp file, and the result text includes a `[Output truncated: ...]` footer with the file path, so the model can read the complete output when needed.
+- The truncation stats (`TruncationResult`) and the full-output path are also available in `details.truncation` and `details.fullOutputPath`.
+- Error messages from git/gh are capped the same way (tail-first, so the fatal line survives); full stderr remains on the `CommandError` object.
+- Temp output files are removed at session shutdown.
+
 ## Development
 
 ```bash

@@ -13,6 +13,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { wireDynamicTools } from "./activate.js";
 import { registerGhTools } from "./gh-tools.js";
 import { registerGitTools } from "./git-tools.js";
+import { registerTruncationCleanup } from "./truncate.js";
 
 export * from "./activate.js";
 export * from "./utils.js";
@@ -22,4 +23,5 @@ export default function piGitToolsExtension(pi: ExtensionAPI) {
 	registerGitTools(pi);
 	registerGhTools(pi);
 	wireDynamicTools(pi);
+	registerTruncationCleanup(pi);
 }

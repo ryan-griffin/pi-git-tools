@@ -3,11 +3,12 @@
  */
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
+import { registerTool } from "../../truncate.js";
 import { findRepoRoot, resolveCwd, run } from "../../utils.js";
 import { validateBranchName, validateRemoteName } from "../../validation.js";
 
 export function register(pi: ExtensionAPI) {
-	pi.registerTool({
+	registerTool(pi, {
 		name: "git_fetch",
 		label: "Git Fetch",
 		description: "Fetch from a remote repository. Defaults to origin.",

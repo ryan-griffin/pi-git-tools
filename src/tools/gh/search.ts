@@ -3,6 +3,7 @@
  */
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
+import { registerTool } from "../../truncate.js";
 import { findRepoRoot, resolveCwd, run } from "../../utils.js";
 import { validateRepo, validateSearchQuery } from "../../validation.js";
 import { formatGhAuthor, requireGh } from "../gh-helpers.js";
@@ -89,7 +90,7 @@ function formatSearchResults(
 }
 
 export function register(pi: ExtensionAPI) {
-	pi.registerTool({
+	registerTool(pi, {
 		name: "gh_search",
 		label: "GitHub Search",
 		description:

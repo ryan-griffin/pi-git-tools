@@ -8,12 +8,13 @@
  */
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
+import { registerTool } from "../../truncate.js";
 import { findRepoRoot, resolveCwd, run, tempInputFile } from "../../utils.js";
 
 const MAX_PATCH_BYTES = 10 * 1024 * 1024;
 
 export function register(pi: ExtensionAPI) {
-	pi.registerTool({
+	registerTool(pi, {
 		name: "git_apply",
 		label: "Git Apply",
 		description:

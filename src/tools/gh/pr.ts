@@ -3,12 +3,13 @@
  */
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
+import { registerTool } from "../../truncate.js";
 import { findRepoRoot, resolveCwd, run } from "../../utils.js";
 import { validateBranchName, validateGhHeadRef } from "../../validation.js";
 import { formatGhAuthor, requireGh, resolveRepo } from "../gh-helpers.js";
 
 export function register(pi: ExtensionAPI) {
-	pi.registerTool({
+	registerTool(pi, {
 		name: "gh_pr",
 		label: "GitHub PR",
 		description:

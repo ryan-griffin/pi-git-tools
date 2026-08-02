@@ -2,12 +2,14 @@
  * pi-git-tools — git_config tool registration.
  */
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { truncateLine } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
+import { registerTool } from "../../truncate.js";
 import { findRepoRoot, resolveCwd, run } from "../../utils.js";
 import { validateConfigKey } from "../../validation.js";
 
 export function register(pi: ExtensionAPI) {
-	pi.registerTool({
+	registerTool(pi, {
 		name: "git_config",
 		label: "Git Config",
 		description:
@@ -118,7 +120,9 @@ export function register(pi: ExtensionAPI) {
 								action: "get",
 								name: params.name,
 								scope,
-								value: output,
+								// Avoid duplicating a potentially huge value in details:
+								// the full value is already the tool's content text.
+								value: truncateLine(output, 4000).text,
 							},
 						};
 					} catch (err: unknown) {

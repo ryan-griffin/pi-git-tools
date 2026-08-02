@@ -47,6 +47,7 @@ function readSource(relativePath) {
 // Read all source modules: top-level files plus every per-tool module.
 const TOP_LEVEL_FILES = [
 	"src/activate.ts",
+	"src/truncate.ts",
 	"src/validation.ts",
 	"src/utils.ts",
 	"src/git-tools.ts",
@@ -185,7 +186,7 @@ for (const name of TOOL_NAMES) {
 
 // 4. Check registration: one registerTool call per tool module
 console.log("\nRegistration:");
-const regCalls = (source.match(/pi\.registerTool\(\{/g) || []).length;
+const regCalls = (source.match(/registerTool\(pi, \{/g) || []).length;
 assertEqual(regCalls, TOOL_NAMES.length, "registerTool call count");
 const gitRegCalls = (
 	sources["src/git-tools.ts"].match(/register\w+\(pi\)/g) || []
@@ -237,7 +238,7 @@ console.log("\nTypeBox:");
 // Every module that registers a tool must import TypeBox; plain helpers (e.g.
 // gh-helpers.ts) are exempt.
 const toolModules = TOOL_FILES.filter((f) =>
-	sources[f].includes("pi.registerTool"),
+	sources[f].includes("registerTool(pi, {"),
 );
 assert(
 	toolModules.every((f) =>
@@ -294,6 +295,14 @@ assert(
 assert(
 	sources["src/index.ts"].includes("import { registerGhTools }"),
 	"src/index.ts imports registerGhTools",
+);
+assert(
+	sources["src/index.ts"].includes("import { registerTruncationCleanup }"),
+	"src/index.ts imports registerTruncationCleanup",
+);
+assert(
+	sources["src/index.ts"].includes("registerTruncationCleanup(pi)"),
+	"src/index.ts wires truncation cleanup",
 );
 console.log("  Module chain intact");
 
