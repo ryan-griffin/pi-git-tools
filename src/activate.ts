@@ -10,10 +10,11 @@
  * Anthropic >= 4.5 / OpenAI gpt-5.4+; full active-list fallback on other
  * hosts, per extensions.md "Dynamic Tool Loading").
  *
- * The lazy split keeps the ~5k tokens of always-on core git tool schemas
- * in the prompt prefix and defers the other ~3.9k (rare git operations +
- * all GitHub tools, which need `gh` auth anyway) until the model actually
- * asks for them.
+ * The lazy split keeps the ~6k tokens of always-on core git tool schemas
+ * (including the output-truncation policy suffix appended to every tool
+ * description) in the prompt prefix and defers the other ~3.9k (rare git
+ * operations + all GitHub tools, which need `gh` auth anyway) until the
+ * model actually asks for them.
  *
  * Override the default split with `PI_GIT_TOOLS_ACTIVE`: a comma-separated
  * list of tool names and/or group names (`git-advanced`, `gh`), or `all`
@@ -22,6 +23,7 @@
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
+import { registerTool } from "./truncate.js";
 
 /** Lazy tool catalog: one-line summary (loader description) + group. */
 export interface ToolCatalogEntry {
@@ -169,7 +171,7 @@ export function registerActivateTool(pi: ExtensionAPI) {
 		(entry) => `${entry.name} — ${entry.summary} [${entry.group}]`,
 	).join("\n");
 
-	pi.registerTool({
+	registerTool(pi, {
 		name: "git_tools_activate",
 		label: "Activate pi-git-tools",
 		description:

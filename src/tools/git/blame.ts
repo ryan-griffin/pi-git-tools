@@ -3,11 +3,12 @@
  */
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
+import { registerTool } from "../../truncate.js";
 import { findRepoRoot, resolveCwd, run } from "../../utils.js";
 import { validateCommitish, validateGitPath } from "../../validation.js";
 
 export function register(pi: ExtensionAPI) {
-	pi.registerTool({
+	registerTool(pi, {
 		name: "git_blame",
 		label: "Git Blame",
 		description:

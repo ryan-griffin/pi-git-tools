@@ -8,12 +8,13 @@
  */
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
+import { registerTool } from "../../truncate.js";
 import { findRepoRoot, resolveCwd, run, tempInputFile } from "../../utils.js";
 
 const METHODS = ["GET", "POST", "PATCH", "PUT", "DELETE"];
 
 export function register(pi: ExtensionAPI) {
-	pi.registerTool({
+	registerTool(pi, {
 		name: "gh_api",
 		label: "GitHub API",
 		description:

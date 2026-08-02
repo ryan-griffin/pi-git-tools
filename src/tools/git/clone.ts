@@ -3,6 +3,7 @@
  */
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
+import { registerTool } from "../../truncate.js";
 import { resolveCwd, run } from "../../utils.js";
 import {
 	validateBranchName,
@@ -12,7 +13,7 @@ import {
 } from "../../validation.js";
 
 export function register(pi: ExtensionAPI) {
-	pi.registerTool({
+	registerTool(pi, {
 		name: "git_clone",
 		label: "Git Clone",
 		description:
