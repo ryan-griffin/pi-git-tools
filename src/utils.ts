@@ -62,6 +62,81 @@ const OUTPUT_LIMIT_DESCRIPTION =
 	"(whichever is hit first). If truncated, the result includes an explicit notice.";
 const TRUNCATION_NOTICE_RESERVE_BYTES = 256;
 
+type TextResult = { content: unknown[] };
+
+/** Bound one text value using the same UTF-8 and line-count semantics as pi. */
+function boundText(text: string): string {
+	const initial = truncateHead(text);
+	if (!initial.truncated) return text;
+
+	const truncation = truncateHead(text, {
+		maxLines: DEFAULT_MAX_LINES - 1,
+		maxBytes: DEFAULT_MAX_BYTES - TRUNCATION_NOTICE_RESERVE_BYTES,
+	});
+	const omittedLines = truncation.totalLines - truncation.outputLines;
+	const omittedBytes = truncation.totalBytes - truncation.outputBytes;
+	const notice =
+		`[Output truncated: showing ${truncation.outputLines} of ${truncation.totalLines} lines ` +
+		`(${formatSize(truncation.outputBytes)} of ${formatSize(truncation.totalBytes)}). ` +
+		`${omittedLines} lines (${formatSize(omittedBytes)}) omitted.]`;
+	return truncation.content ? `${truncation.content}\n${notice}` : notice;
+}
+
+/**
+ * Bound every text block in a pi tool result, preserving non-text blocks and
+ * all result metadata. Multiple text blocks are represented as one bounded
+ * text block when truncation is needed, matching the model-facing output.
+ */
+function boundTextResult<T extends TextResult>(result: T): T {
+	const textBlocks = result.content.filter(
+		(block): block is { type: "text"; text: string } =>
+			typeof block === "object" &&
+			block !== null &&
+			"type" in block &&
+			block.type === "text" &&
+			"text" in block &&
+			typeof block.text === "string",
+	);
+	if (textBlocks.length === 0) return result;
+
+	const output = textBlocks.map((block) => block.text).join("\n");
+	const boundedText = boundText(output);
+	if (boundedText === output) return result;
+
+	let inserted = false;
+	const content: T["content"] = [];
+	for (const block of result.content) {
+		if (
+			typeof block !== "object" ||
+			block === null ||
+			!("type" in block) ||
+			block.type !== "text"
+		) {
+			content.push(block);
+		} else if (!inserted) {
+			content.push({ type: "text", text: boundedText } as T["content"][number]);
+			inserted = true;
+		}
+	}
+	return { ...result, content };
+}
+
+/**
+ * Re-throw a tool failure with only its model-facing error message bounded.
+ * The original Error object is retained so command metadata (exit code,
+ * stdout, stderr, and custom fields) remains available to the host.
+ */
+function rethrowBounded(error: unknown): never {
+	const message = error instanceof Error ? error.message : String(error);
+	const bounded = boundText(message);
+	if (error instanceof Error) {
+		if (bounded !== message) error.message = bounded;
+		throw error;
+	}
+	if (typeof error === "string") throw bounded;
+	throw new Error(bounded, { cause: error });
+}
+
 /**
  * Apply pi's output contract to every text result registered by this extension.
  * Commands are still captured in full by run() so parsers and details retain
@@ -74,49 +149,22 @@ export function withOutputLimits(pi: ExtensionAPI): ExtensionAPI {
 			...tool,
 			description: `${tool.description} ${OUTPUT_LIMIT_DESCRIPTION}`,
 			execute: async (toolCallId, params, signal, onUpdate, ctx) => {
-				const result = await tool.execute(
-					toolCallId,
-					params,
-					signal,
-					onUpdate,
-					ctx,
-				);
-				const textBlocks = result.content.filter(
-					(block): block is { type: "text"; text: string } =>
-						block.type === "text",
-				);
-				if (textBlocks.length === 0) return result;
-
-				const output = textBlocks.map((block) => block.text).join("\n");
-				const initial = truncateHead(output);
-				if (!initial.truncated) return result;
-
-				const truncation = truncateHead(output, {
-					maxLines: DEFAULT_MAX_LINES - 1,
-					maxBytes: DEFAULT_MAX_BYTES - TRUNCATION_NOTICE_RESERVE_BYTES,
-				});
-				const omittedLines = truncation.totalLines - truncation.outputLines;
-				const omittedBytes = truncation.totalBytes - truncation.outputBytes;
-				const notice =
-					`[Output truncated: showing ${truncation.outputLines} of ${truncation.totalLines} lines ` +
-					`(${formatSize(truncation.outputBytes)} of ${formatSize(truncation.totalBytes)}). ` +
-					`${omittedLines} lines (${formatSize(omittedBytes)}) omitted.]`;
-				const boundedText = truncation.content
-					? `${truncation.content}\n${notice}`
-					: notice;
-				let inserted = false;
-				const content: typeof result.content = [];
-				for (const block of result.content) {
-					if (block.type !== "text") {
-						content.push(block);
-						continue;
-					}
-					if (!inserted) {
-						content.push({ type: "text", text: boundedText });
-						inserted = true;
-					}
+				const boundedOnUpdate = onUpdate
+					? (partialResult: Parameters<NonNullable<typeof onUpdate>>[0]) =>
+							onUpdate(boundTextResult(partialResult))
+					: undefined;
+				try {
+					const result = await tool.execute(
+						toolCallId,
+						params,
+						signal,
+						boundedOnUpdate,
+						ctx,
+					);
+					return boundTextResult(result);
+				} catch (error) {
+					rethrowBounded(error);
 				}
-				return { ...result, content };
 			},
 		};
 		pi.registerTool(wrappedTool);

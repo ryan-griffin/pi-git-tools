@@ -25,6 +25,7 @@
 		"precommit": "npm run typecheck && npm run check && npm run test"
 	},
 	"peerDependencies": {
+		"@earendil-works/pi-coding-agent": "*",
 		"typebox": "*"
 	},
 	"devDependencies": {

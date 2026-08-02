@@ -75,7 +75,7 @@ describe("findRepoRoot error handling", () => {
 // withOutputLimits
 // ---------------------------------------------------------------------------
 describe("withOutputLimits", () => {
-	it("bounds oversized tool output and explains what was omitted", async () => {
+	function registerTool(execute) {
 		const registered = [];
 		const boundedPi = withOutputLimits({
 			registerTool(definition) {
@@ -83,35 +83,121 @@ describe("withOutputLimits", () => {
 			},
 		});
 		boundedPi.registerTool({
-			name: "large-output",
-			label: "Large output",
+			name: "test-output",
+			label: "Test output",
 			description: "A test tool.",
 			parameters: {},
-			execute: async () => ({
-				content: [
-					{
-						type: "text",
-						text: Array.from({ length: 2_100 }, (_, i) => `line-${i}`).join(
-							"\n",
-						),
-					},
-				],
-				details: {},
-			}),
+			execute,
 		});
-		const result = await registered[0].execute(
-			"call",
-			{},
-			undefined,
-			undefined,
-			{},
-		);
+		return registered[0];
+	}
+
+	it("bounds oversized final output and explains what was omitted", async () => {
+		const tool = registerTool(async () => ({
+			content: [
+				{
+					type: "text",
+					text: Array.from({ length: 2_100 }, (_, i) => `line-${i}`).join("\n"),
+				},
+			],
+			details: {},
+		}));
+		const result = await tool.execute("call", {}, undefined, undefined, {});
 		const text = result.content[0].text;
 		assert.ok(text.includes("line-0"));
 		assert.ok(text.includes("Output truncated"));
 		assert.ok(Buffer.byteLength(text, "utf8") <= 50 * 1024);
 		assert.ok(text.split("\n").length <= 2_000);
-		assert.match(registered[0].description, /2,000 lines|2000 lines/);
+		assert.match(tool.description, /2,000 lines|2000 lines/);
+	});
+
+	it("bounds UTF-8 output without splitting characters", async () => {
+		const tool = registerTool(async () => ({
+			content: [
+				{
+					type: "text",
+					text: Array.from({ length: 1_100 }, () => "😀".repeat(20)).join("\n"),
+				},
+			],
+			details: {},
+		}));
+		const result = await tool.execute("call", {}, undefined, undefined, {});
+		const text = result.content[0].text;
+		assert.ok(text.includes("😀"));
+		assert.ok(text.includes("Output truncated"));
+		assert.ok(!text.includes("�"));
+		assert.ok(Buffer.byteLength(text, "utf8") <= 50 * 1024);
+		assert.ok(text.split("\n").length <= 2_000);
+	});
+
+	it("bounds every partial update while preserving the final result", async () => {
+		const updates = [];
+		const final = {
+			content: [{ type: "text", text: "done" }],
+			details: { ok: true },
+		};
+		const tool = registerTool(async (_id, _params, _signal, onUpdate) => {
+			onUpdate({
+				content: [
+					{
+						type: "text",
+						text: Array.from({ length: 2_100 }, (_, i) => `partial-${i}`).join(
+							"\n",
+						),
+					},
+				],
+				details: { phase: "working" },
+			});
+			return final;
+		});
+		const result = await tool.execute(
+			"call",
+			{},
+			undefined,
+			(update) => {
+				updates.push(update);
+			},
+			{},
+		);
+		assert.equal(result, final);
+		assert.equal(updates.length, 1);
+		const text = updates[0].content[0].text;
+		assert.ok(text.includes("Output truncated"));
+		assert.ok(Buffer.byteLength(text, "utf8") <= 50 * 1024);
+		assert.ok(text.split("\n").length <= 2_000);
+	});
+
+	it("bounds thrown errors without converting failures to success", async () => {
+		const thrown = new Error(
+			Array.from({ length: 2_100 }, (_, i) => `failure-${i}`).join("\n"),
+		);
+		thrown.code = "COMMAND_FAILED";
+		const tool = registerTool(async () => {
+			throw thrown;
+		});
+		await assert.rejects(
+			() => tool.execute("call", {}, undefined, undefined, {}),
+			(err) => {
+				assert.equal(err, thrown);
+				assert.equal(err.code, "COMMAND_FAILED");
+				assert.ok(err.message.includes("Output truncated"));
+				assert.ok(Buffer.byteLength(err.message, "utf8") <= 50 * 1024);
+				assert.ok(err.message.split("\n").length <= 2_000);
+				return true;
+			},
+		);
+	});
+
+	it("preserves non-oversized result identity and content", async () => {
+		const result = {
+			content: [{ type: "text", text: "small" }],
+			details: { ok: true },
+		};
+		const tool = registerTool(async () => result);
+		assert.equal(
+			await tool.execute("call", {}, undefined, undefined, {}),
+			result,
+		);
 	});
 });
 
