@@ -14,6 +14,7 @@ import { resolve } from "node:path";
 import { describe, it } from "node:test";
 
 const { resolveCwd } = await import("../../src/utils.ts");
+const { withOutputLimits } = await import("../../src/utils.ts");
 
 // ---------------------------------------------------------------------------
 // resolveCwd
@@ -67,6 +68,50 @@ describe("findRepoRoot error handling", () => {
 				err.message.includes("not installed") ||
 				err.message.includes("not in PATH"),
 		);
+	});
+});
+
+// ---------------------------------------------------------------------------
+// withOutputLimits
+// ---------------------------------------------------------------------------
+describe("withOutputLimits", () => {
+	it("bounds oversized tool output and explains what was omitted", async () => {
+		const registered = [];
+		const boundedPi = withOutputLimits({
+			registerTool(definition) {
+				registered.push(definition);
+			},
+		});
+		boundedPi.registerTool({
+			name: "large-output",
+			label: "Large output",
+			description: "A test tool.",
+			parameters: {},
+			execute: async () => ({
+				content: [
+					{
+						type: "text",
+						text: Array.from({ length: 2_100 }, (_, i) => `line-${i}`).join(
+							"\n",
+						),
+					},
+				],
+				details: {},
+			}),
+		});
+		const result = await registered[0].execute(
+			"call",
+			{},
+			undefined,
+			undefined,
+			{},
+		);
+		const text = result.content[0].text;
+		assert.ok(text.includes("line-0"));
+		assert.ok(text.includes("Output truncated"));
+		assert.ok(Buffer.byteLength(text, "utf8") <= 50 * 1024);
+		assert.ok(text.split("\n").length <= 2_000);
+		assert.match(registered[0].description, /2,000 lines|2000 lines/);
 	});
 });
 

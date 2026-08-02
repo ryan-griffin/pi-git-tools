@@ -9,6 +9,14 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
+import {
+	DEFAULT_MAX_BYTES,
+	DEFAULT_MAX_LINES,
+	type ExtensionAPI,
+	formatSize,
+	type ToolDefinition,
+	truncateHead,
+} from "@earendil-works/pi-coding-agent";
 
 const execFileAsync = promisify(execFile);
 
@@ -47,6 +55,73 @@ export interface ToolContext {
 export interface ToolResult {
 	content: Array<{ type: "text"; text: string }>;
 	details?: Record<string, unknown>;
+}
+
+const OUTPUT_LIMIT_DESCRIPTION =
+	`Output is truncated to ${DEFAULT_MAX_LINES} lines or ${formatSize(DEFAULT_MAX_BYTES)} ` +
+	"(whichever is hit first). If truncated, the result includes an explicit notice.";
+const TRUNCATION_NOTICE_RESERVE_BYTES = 256;
+
+/**
+ * Apply pi's output contract to every text result registered by this extension.
+ * Commands are still captured in full by run() so parsers and details retain
+ * their existing behavior; only the result sent back to the model is bounded.
+ */
+export function withOutputLimits(pi: ExtensionAPI): ExtensionAPI {
+	const boundedPi = Object.create(pi) as ExtensionAPI;
+	boundedPi.registerTool = ((tool: ToolDefinition) => {
+		const wrappedTool: ToolDefinition = {
+			...tool,
+			description: `${tool.description} ${OUTPUT_LIMIT_DESCRIPTION}`,
+			execute: async (toolCallId, params, signal, onUpdate, ctx) => {
+				const result = await tool.execute(
+					toolCallId,
+					params,
+					signal,
+					onUpdate,
+					ctx,
+				);
+				const textBlocks = result.content.filter(
+					(block): block is { type: "text"; text: string } =>
+						block.type === "text",
+				);
+				if (textBlocks.length === 0) return result;
+
+				const output = textBlocks.map((block) => block.text).join("\n");
+				const initial = truncateHead(output);
+				if (!initial.truncated) return result;
+
+				const truncation = truncateHead(output, {
+					maxLines: DEFAULT_MAX_LINES - 1,
+					maxBytes: DEFAULT_MAX_BYTES - TRUNCATION_NOTICE_RESERVE_BYTES,
+				});
+				const omittedLines = truncation.totalLines - truncation.outputLines;
+				const omittedBytes = truncation.totalBytes - truncation.outputBytes;
+				const notice =
+					`[Output truncated: showing ${truncation.outputLines} of ${truncation.totalLines} lines ` +
+					`(${formatSize(truncation.outputBytes)} of ${formatSize(truncation.totalBytes)}). ` +
+					`${omittedLines} lines (${formatSize(omittedBytes)}) omitted.]`;
+				const boundedText = truncation.content
+					? `${truncation.content}\n${notice}`
+					: notice;
+				let inserted = false;
+				const content: typeof result.content = [];
+				for (const block of result.content) {
+					if (block.type !== "text") {
+						content.push(block);
+						continue;
+					}
+					if (!inserted) {
+						content.push({ type: "text", text: boundedText });
+						inserted = true;
+					}
+				}
+				return { ...result, content };
+			},
+		};
+		pi.registerTool(wrappedTool);
+	}) as ExtensionAPI["registerTool"];
+	return boundedPi;
 }
 
 // ---------------------------------------------------------------------------

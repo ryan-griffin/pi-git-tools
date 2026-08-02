@@ -5,7 +5,6 @@
  * with the pi ExtensionAPI.
  */
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-
 import { register as registerAdd } from "./tools/git/add.js";
 import { register as registerApply } from "./tools/git/apply.js";
 import { register as registerBlame } from "./tools/git/blame.js";
@@ -33,34 +32,36 @@ import { register as registerStash } from "./tools/git/stash.js";
 import { register as registerStatus } from "./tools/git/status.js";
 import { register as registerTag } from "./tools/git/tag.js";
 import { register as registerWorktree } from "./tools/git/worktree.js";
+import { withOutputLimits } from "./utils.js";
 
 /** Register all git tools with the given ExtensionAPI. */
 export function registerGitTools(pi: ExtensionAPI) {
-	registerAdd(pi);
-	registerApply(pi);
-	registerBlame(pi);
-	registerBranch(pi);
-	registerCherryPick(pi);
-	registerClean(pi);
-	registerClone(pi);
-	registerCommit(pi);
-	registerConfig(pi);
-	registerDiff(pi);
-	registerFetch(pi);
-	registerInit(pi);
-	registerLog(pi);
-	registerMerge(pi);
-	registerPull(pi);
-	registerPush(pi);
-	registerRebase(pi);
-	registerRemote(pi);
-	registerReflog(pi);
-	registerReset(pi);
-	registerRestore(pi);
-	registerRevert(pi);
-	registerShow(pi);
-	registerStash(pi);
-	registerStatus(pi);
-	registerTag(pi);
-	registerWorktree(pi);
+	const boundedPi = withOutputLimits(pi);
+	registerAdd(boundedPi);
+	registerApply(boundedPi);
+	registerBlame(boundedPi);
+	registerBranch(boundedPi);
+	registerCherryPick(boundedPi);
+	registerClean(boundedPi);
+	registerClone(boundedPi);
+	registerCommit(boundedPi);
+	registerConfig(boundedPi);
+	registerDiff(boundedPi);
+	registerFetch(boundedPi);
+	registerInit(boundedPi);
+	registerLog(boundedPi);
+	registerMerge(boundedPi);
+	registerPull(boundedPi);
+	registerPush(boundedPi);
+	registerRebase(boundedPi);
+	registerRemote(boundedPi);
+	registerReflog(boundedPi);
+	registerReset(boundedPi);
+	registerRestore(boundedPi);
+	registerRevert(boundedPi);
+	registerShow(boundedPi);
+	registerStash(boundedPi);
+	registerStatus(boundedPi);
+	registerTag(boundedPi);
+	registerWorktree(boundedPi);
 }
