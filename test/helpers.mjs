@@ -21,6 +21,34 @@ export {
 };
 
 /**
+ * Run fn with the given environment overrides, restoring the previous values
+ * (or deleting keys that were unset) afterwards. Keys whose value is
+ * undefined are deleted for the duration.
+ */
+export async function withEnv(env, fn) {
+	const previous = new Map();
+	for (const [key, value] of Object.entries(env)) {
+		previous.set(key, process.env[key]);
+		if (value === undefined) {
+			delete process.env[key];
+		} else {
+			process.env[key] = value;
+		}
+	}
+	try {
+		return await fn();
+	} finally {
+		for (const [key, value] of previous) {
+			if (value === undefined) {
+				delete process.env[key];
+			} else {
+				process.env[key] = value;
+			}
+		}
+	}
+}
+
+/**
  * Create a fresh git repo for tests.  Returns { repoPath, ctx }.
  */
 export function setupTempRepo() {

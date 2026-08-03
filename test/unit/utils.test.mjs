@@ -13,6 +13,7 @@ import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { describe, it } from "node:test";
+import { withEnv } from "../helpers.mjs";
 
 const { resolveCwd } = await import("../../src/utils.ts");
 
@@ -72,20 +73,12 @@ describe("findRepoRoot error handling", () => {
 
 	it("propagates timeouts instead of wrapping them", async () => {
 		const { findRepoRoot } = await import("../../src/utils.ts");
-		const original = process.env.PI_GIT_TOOLS_TIMEOUT_MS;
-		process.env.PI_GIT_TOOLS_TIMEOUT_MS = "1";
-		try {
-			await assert.rejects(
+		await withEnv({ PI_GIT_TOOLS_TIMEOUT_MS: "1" }, () =>
+			assert.rejects(
 				() => findRepoRoot(),
 				(err) => err.message.includes("timed out or was cancelled"),
-			);
-		} finally {
-			if (original === undefined) {
-				delete process.env.PI_GIT_TOOLS_TIMEOUT_MS;
-			} else {
-				process.env.PI_GIT_TOOLS_TIMEOUT_MS = original;
-			}
-		}
+			),
+		);
 	});
 });
 
