@@ -188,6 +188,9 @@ export async function findRepoRoot(
 			signal,
 		);
 	} catch (err) {
+		// A timeout or cancellation is an execution failure, not a repo-detection
+		// result — propagate it untouched instead of wrapping it.
+		if (err instanceof CommandTimeoutError) throw err;
 		if (err instanceof Error) {
 			const msg = err.message.toLowerCase();
 			if (msg.includes("not a git repository")) {

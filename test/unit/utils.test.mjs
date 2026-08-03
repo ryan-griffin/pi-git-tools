@@ -69,6 +69,24 @@ describe("findRepoRoot error handling", () => {
 				err.message.includes("not in PATH"),
 		);
 	});
+
+	it("propagates timeouts instead of wrapping them", async () => {
+		const { findRepoRoot } = await import("../../src/utils.ts");
+		const original = process.env.PI_GIT_TOOLS_TIMEOUT_MS;
+		process.env.PI_GIT_TOOLS_TIMEOUT_MS = "1";
+		try {
+			await assert.rejects(
+				() => findRepoRoot(),
+				(err) => err.message.includes("timed out or was cancelled"),
+			);
+		} finally {
+			if (original === undefined) {
+				delete process.env.PI_GIT_TOOLS_TIMEOUT_MS;
+			} else {
+				process.env.PI_GIT_TOOLS_TIMEOUT_MS = original;
+			}
+		}
+	});
 });
 
 // ---------------------------------------------------------------------------

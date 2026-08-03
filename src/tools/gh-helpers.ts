@@ -3,7 +3,7 @@
  *
  * These are used by gh_* tool registrations.
  */
-import { CommandTimeoutError, run } from "../utils.js";
+import { CommandTimeoutError, findRepoRoot, run } from "../utils.js";
 import { validateRepo } from "../validation.js";
 
 export async function requireGh(repoRoot?: string, signal?: AbortSignal) {
@@ -38,6 +38,24 @@ export async function requireGh(repoRoot?: string, signal?: AbortSignal) {
 			// Other errors (e.g. no network, rate limit) are non-fatal — gh may still work partially
 			console.warn(`[pi-git-tools] gh auth check warning: ${message}`);
 		}
+	}
+}
+
+/**
+ * Best-effort repo-root probe for gh tools. Running outside a git repository
+ * (or without git installed) is fine — gh resolves the repo from cwd itself —
+ * but a timeout or host cancellation is a real execution failure and must
+ * propagate instead of being silently masked as "not in a repo".
+ */
+export async function findRepoRootBestEffort(
+	cwd?: string,
+	signal?: AbortSignal,
+): Promise<string | undefined> {
+	try {
+		return await findRepoRoot(cwd, signal);
+	} catch (err) {
+		if (err instanceof CommandTimeoutError) throw err;
+		return undefined;
 	}
 }
 

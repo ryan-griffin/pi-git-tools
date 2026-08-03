@@ -10,9 +10,8 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { describe, it } from "node:test";
 import { assert, execFileSync, resolve, tmpdir } from "../helpers.mjs";
 
-const { githubRepoFromRemote, requireGh, resolveRepo } = await import(
-	"../../src/tools/gh-helpers.ts"
-);
+const { findRepoRootBestEffort, githubRepoFromRemote, requireGh, resolveRepo } =
+	await import("../../src/tools/gh-helpers.ts");
 
 describe("githubRepoFromRemote", () => {
 	const accepts = [
@@ -336,5 +335,43 @@ describe("requireGh", () => {
 
 	it("returns normally when gh is installed and authenticated", async () => {
 		await requireGh();
+	});
+});
+
+describe("findRepoRootBestEffort", () => {
+	it("returns undefined outside a git repository", async () => {
+		const dir = mkdtempSync(resolve(tmpdir(), "pi-git-tools-test-"));
+		try {
+			assert.equal(await findRepoRootBestEffort(dir), undefined);
+		} finally {
+			rmSync(dir, { recursive: true, force: true });
+		}
+	});
+
+	it("returns the repo root inside a repository", async () => {
+		const dir = mkdtempSync(resolve(tmpdir(), "pi-git-tools-test-"));
+		try {
+			execFileSync("git", ["init", "-q"], { cwd: dir });
+			assert.equal(await findRepoRootBestEffort(dir), dir);
+		} finally {
+			rmSync(dir, { recursive: true, force: true });
+		}
+	});
+
+	it("propagates timeouts instead of returning undefined", async () => {
+		const original = process.env.PI_GIT_TOOLS_TIMEOUT_MS;
+		process.env.PI_GIT_TOOLS_TIMEOUT_MS = "1";
+		try {
+			await assert.rejects(
+				() => findRepoRootBestEffort(),
+				(err) => err.message.includes("timed out or was cancelled"),
+			);
+		} finally {
+			if (original === undefined) {
+				delete process.env.PI_GIT_TOOLS_TIMEOUT_MS;
+			} else {
+				process.env.PI_GIT_TOOLS_TIMEOUT_MS = original;
+			}
+		}
 	});
 });
