@@ -4,9 +4,13 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import { registerTool } from "../../truncate.js";
-import { findRepoRoot, resolveCwd, run } from "../../utils.js";
+import { resolveCwd, run } from "../../utils.js";
 import { validateRepo, validateSearchQuery } from "../../validation.js";
-import { formatGhAuthor, requireGh } from "../gh-helpers.js";
+import {
+	findRepoRootBestEffort,
+	formatGhAuthor,
+	requireGh,
+} from "../gh-helpers.js";
 
 /** Get JSON fields for a given gh search type. */
 function getSearchFields(type: string): string {
@@ -197,7 +201,7 @@ export function register(pi: ExtensionAPI) {
 		}),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
-			const root = await findRepoRoot(cwd, _signal).catch(() => undefined);
+			const root = await findRepoRootBestEffort(cwd, _signal);
 			await requireGh(root, _signal);
 
 			const searchType = params.type || "repos";

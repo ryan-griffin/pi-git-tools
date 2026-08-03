@@ -9,7 +9,8 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import { registerTool } from "../../truncate.js";
-import { findRepoRoot, resolveCwd, run, tempInputFile } from "../../utils.js";
+import { resolveCwd, run, tempInputFile } from "../../utils.js";
+import { findRepoRootBestEffort } from "../gh-helpers.js";
 
 const METHODS = ["GET", "POST", "PATCH", "PUT", "DELETE"];
 
@@ -57,7 +58,7 @@ export function register(pi: ExtensionAPI) {
 		}),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
-			const root = await findRepoRoot(cwd, _signal).catch(() => undefined);
+			const root = await findRepoRootBestEffort(cwd, _signal);
 
 			const method = (params.method || "GET").toUpperCase();
 			if (!METHODS.includes(method)) {
