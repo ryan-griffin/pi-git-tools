@@ -212,9 +212,10 @@ describe("registerActivateTool", () => {
 		const defs = [];
 		const pi = { registerTool: (d) => defs.push(d) };
 		registerActivateTool(pi);
-		const res = await defs[0].execute("id", {}, undefined);
-		assert.equal(res.isError, true);
-		assert.ok(res.content[0].text.includes("Available:"));
+		await assert.rejects(
+			defs[0].execute("id", {}, undefined),
+			/No valid tools given\. Available:/,
+		);
 	});
 });
 

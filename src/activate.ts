@@ -21,7 +21,10 @@
  * to keep every tool active from the start.
  */
 
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import type {
+	AgentToolResult,
+	ExtensionAPI,
+} from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import { registerTool } from "./truncate.js";
 
@@ -30,6 +33,13 @@ export interface ToolCatalogEntry {
 	name: string;
 	summary: string;
 	group: string;
+}
+
+/** Details payload for the `git_tools_activate` tool result. */
+export interface ActivateToolDetails {
+	matches: string[];
+	added: string[];
+	alreadyActive: string[];
 }
 
 export const TOOL_CATALOG: ToolCatalogEntry[] = [
@@ -208,7 +218,7 @@ export function registerActivateTool(pi: ExtensionAPI) {
 			_callId,
 			params: { tools?: string[]; group?: string | string[] },
 			_signal,
-		) {
+		): Promise<AgentToolResult<ActivateToolDetails>> {
 			const requested = new Set<string>();
 			if (Array.isArray(params.tools)) {
 				for (const name of params.tools) {
@@ -227,20 +237,12 @@ export function registerActivateTool(pi: ExtensionAPI) {
 				}
 			}
 			if (requested.size === 0) {
-				return {
-					content: [
-						{
-							type: "text",
-							text: `No valid tools given. Available: ${LAZY_TOOL_NAMES.join(", ")}`,
-						},
-					],
-					isError: true,
-					details: {
-						matches: [] as string[],
-						added: [] as string[],
-						alreadyActive: [] as string[],
-					},
-				};
+				// Per the pi extension contract (docs/extensions.md "Signaling
+				// errors"), failures must be signaled by throwing: returning a
+				// value never sets the error flag, regardless of properties.
+				throw new Error(
+					`No valid tools given. Available: ${LAZY_TOOL_NAMES.join(", ")}`,
+				);
 			}
 
 			const active = pi.getActiveTools();
