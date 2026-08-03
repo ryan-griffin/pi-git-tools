@@ -11,17 +11,21 @@ export function register(pi: ExtensionAPI) {
 	registerTool(pi, {
 		name: "git_fetch",
 		label: "Git Fetch",
-		description: "Fetch from a remote repository. Defaults to origin.",
+		description:
+			"Fetch from a remote repository. Defaults to the current branch's upstream (origin when none is set).",
 		promptSnippet: "Fetch from remote",
 		parameters: Type.Object({
 			remote: Type.Optional(
 				Type.String({
-					description: "Remote name (default: origin).",
+					description:
+						"Remote name (default: current branch's upstream, else origin).",
+					minLength: 1,
 				}),
 			),
 			branch: Type.Optional(
 				Type.String({
 					description: "Branch to fetch (default: all branches).",
+					minLength: 1,
 				}),
 			),
 			prune: Type.Optional(
@@ -82,15 +86,20 @@ export function register(pi: ExtensionAPI) {
 				args.push("--depth", String(params.depth));
 			if (params.unshallow) args.push("--unshallow");
 			if (params.all) args.push("--all");
-			const remote = params.remote || (params.branch ? "origin" : undefined);
-			if (remote) {
-				validateRemoteName(remote, "fetch remote");
-				args.push(remote);
+			// Validate present-but-empty strings: `""` must not be silently
+			// treated as "omitted".
+			if (params.remote !== undefined) {
+				validateRemoteName(params.remote, "fetch remote");
 			}
-			if (params.branch) {
+			if (params.branch !== undefined) {
 				validateBranchName(params.branch, "fetch branch");
-				args.push(params.branch);
 			}
+			// Bare `git fetch` follows the current branch's upstream, falling
+			// back to origin when no upstream is set. A branch refspec needs an
+			// explicit remote (origin by default); --all never takes one.
+			const remote = params.remote || (params.branch ? "origin" : undefined);
+			if (remote) args.push(remote);
+			if (params.branch) args.push(params.branch);
 
 			const output = await run("git", args, root, undefined, _signal);
 			return {

@@ -17,13 +17,16 @@ export function register(pi: ExtensionAPI) {
 		parameters: Type.Object({
 			remote: Type.Optional(
 				Type.String({
-					description: "Remote name (default: origin).",
+					description:
+						"Remote name (default: current branch's upstream; origin when 'branch' is given).",
+					minLength: 1,
 				}),
 			),
 			branch: Type.Optional(
 				Type.String({
 					description:
 						"Branch to pull from (default: current branch's upstream).",
+					minLength: 1,
 				}),
 			),
 			rebase: Type.Optional(
@@ -73,15 +76,19 @@ export function register(pi: ExtensionAPI) {
 			if (params.autostash) args.push("--autostash");
 			if (params.noFF) args.push("--no-ff");
 			if (params.squash) args.push("--squash");
-			const remote = params.remote || (params.branch ? "origin" : undefined);
-			if (remote) {
-				validateRemoteName(remote, "pull remote");
-				args.push(remote);
+			// Validate present-but-empty strings: `""` must not be silently
+			// treated as "omitted".
+			if (params.remote !== undefined) {
+				validateRemoteName(params.remote, "pull remote");
 			}
-			if (params.branch) {
+			if (params.branch !== undefined) {
 				validateBranchName(params.branch, "pull branch");
-				args.push(params.branch);
 			}
+			// Bare `git pull` follows the current branch's upstream (git-native);
+			// a branch refspec needs an explicit remote, defaulting to origin.
+			const remote = params.remote || (params.branch ? "origin" : undefined);
+			if (remote) args.push(remote);
+			if (params.branch) args.push(params.branch);
 
 			const output = await run("git", args, root, undefined, _signal);
 			return {

@@ -17,12 +17,15 @@ export function register(pi: ExtensionAPI) {
 		parameters: Type.Object({
 			remote: Type.Optional(
 				Type.String({
-					description: "Remote name (default: origin).",
+					description:
+						"Remote name. Defaults to the current branch's upstream; origin when 'branch' or 'deleteBranch' is given.",
+					minLength: 1,
 				}),
 			),
 			branch: Type.Optional(
 				Type.String({
 					description: "Branch to push (default: current branch).",
+					minLength: 1,
 				}),
 			),
 			setUpstream: Type.Optional(
@@ -52,6 +55,7 @@ export function register(pi: ExtensionAPI) {
 				Type.String({
 					description:
 						"Delete a remote branch (e.g. 'feature/old-branch'). Cannot be used with 'branch'.",
+					minLength: 1,
 				}),
 			),
 			tags: Type.Optional(
@@ -98,19 +102,28 @@ export function register(pi: ExtensionAPI) {
 			if (params.dryRun) args.push("--dry-run");
 			if (params.tags) args.push("--tags");
 			if (params.followTags) args.push("--follow-tags");
-			if (params.deleteBranch) {
+			// Validate present-but-empty strings: `""` must not be silently
+			// treated as "omitted" (e.g. branch: "" would turn a push into a
+			// bare push to the upstream).
+			if (params.remote !== undefined) {
+				validateRemoteName(params.remote, "push remote");
+			}
+			if (params.branch !== undefined) {
+				validateBranchName(params.branch, "push branch");
+			}
+			if (params.deleteBranch !== undefined) {
 				validateBranchName(params.deleteBranch, "delete branch");
 			}
+			// Bare `git push` follows the current branch's upstream (git-native).
+			// Only when a branch/deleteBranch refspec is given without a remote
+			// does the remote default to origin — git requires a remote name to
+			// accompany a refspec.
 			let remote = params.remote;
 			if (!remote && (params.deleteBranch || params.branch)) remote = "origin";
-			if (remote) {
-				validateRemoteName(remote, "push remote");
-				args.push(remote);
-			}
+			if (remote) args.push(remote);
 			if (params.deleteBranch) {
 				args.push("--delete", params.deleteBranch);
 			} else if (params.branch) {
-				validateBranchName(params.branch, "push branch");
 				args.push(params.branch);
 			}
 
