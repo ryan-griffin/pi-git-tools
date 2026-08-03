@@ -35,6 +35,62 @@ export async function requireGh(repoRoot?: string, signal?: AbortSignal) {
 	}
 }
 
+const GITHUB_REMOTE_HOSTS = new Set(["github.com", "www.github.com"]);
+
+/**
+ * Extract `owner/repo` from a git remote URL iff it points at github.com.
+ * Returns null for any other host (GitLab, GitHub Enterprise, lookalikes)
+ * or malformed URLs, so callers skip the remote instead of acting on the
+ * wrong repository.
+ */
+export function githubRepoFromRemote(url: string): string | null {
+	const trimmed = url.trim();
+	if (!trimmed) return null;
+	// Reject control characters: the WHATWG URL parser silently strips ASCII
+	// tab/LF/CR, so a hostname like "git\nhub.com" would parse as github.com.
+	for (const character of trimmed) {
+		const code = character.charCodeAt(0);
+		if (code <= 31 || code === 127) return null;
+	}
+
+	// scp-like syntax: [user@]host:path (e.g. git@github.com:owner/repo.git)
+	const scp = trimmed.match(/^(?:[^@]+@)?([^/:]+):(.+)$/);
+	let parsed: URL;
+	if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(trimmed) && scp) {
+		try {
+			parsed = new URL(`ssh://${scp[1]}/${scp[2]}`);
+		} catch {
+			return null;
+		}
+	} else {
+		try {
+			parsed = new URL(trimmed);
+		} catch {
+			return null;
+		}
+	}
+
+	const host = parsed.hostname.toLowerCase().replace(/\.$/, "");
+	if (!GITHUB_REMOTE_HOSTS.has(host)) return null;
+
+	const [owner, repo, ...rest] = parsed.pathname
+		.split("/")
+		.filter((segment) => segment.length > 0);
+	if (!owner || !repo || rest.length > 0) return null;
+
+	// GitHub forbids repo names ending in ".git", so it can only be a suffix.
+	const lowerRepo = repo.toLowerCase();
+	if (lowerRepo === ".git") return null;
+	if (lowerRepo.endsWith(".git")) {
+		const stripped = repo.slice(0, -4);
+		// "..git" would strip to ".", which validateRepo's charset accepts but
+		// no real GitHub repository name can be (dot-only segments).
+		if (/^\.+$/.test(stripped)) return null;
+		return `${owner}/${stripped}`;
+	}
+	return `${owner}/${repo}`;
+}
+
 export async function resolveRepo(
 	target?: string,
 	repoRoot?: string,
@@ -54,16 +110,24 @@ export async function resolveRepo(
 				undefined,
 				signal,
 			);
-			const match = remoteUrl.match(
-				/(?:github\.com[:/])([^/]+\/[^/]+?)(?:\.git)?\/?$/i,
-			);
-			const repo = match?.[1];
-			if (repo) return validateRepo(repo, "repo");
+			const repo = githubRepoFromRemote(remoteUrl);
+			if (!repo) continue;
+			try {
+				return validateRepo(repo, "repo");
+			} catch (err) {
+				// A github.com remote with a malformed repo (e.g. percent-encoded
+				// path) is skipped so a later valid remote can still resolve.
+				if (err instanceof Error && err.message.includes("invalid format")) {
+					continue;
+				}
+				throw err;
+			}
 		}
 		throw new Error("No GitHub remote found.");
 	} catch (err) {
-		if (err instanceof Error && err.message.includes("invalid format"))
-			throw err;
+		if (signal?.aborted) throw err;
+		// Any other failure (git unavailable, not a repository) is reported
+		// generically; malformed remotes were already skipped above.
 		throw new Error(
 			"No repository specified and could not detect from git remote.",
 		);
