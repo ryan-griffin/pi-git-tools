@@ -67,7 +67,7 @@ Install `gh`: <https://cli.github.com/> and authenticate with `gh auth login`.
 
 ## Dynamic tool loading
 
-To keep the model context lean, not every tool is active by default. All 33 tools are always registered (tests and introspection see them), but 15 of them — the `git-advanced` group (`git_apply`, `git_blame`, `git_cherry_pick`, `git_clean`, `git_clone`, `git_config`, `git_init`, `git_reflog`, `git_revert`, `git_worktree`) and the `gh` group (`gh_api`, `gh_issue`, `gh_pr`, `gh_repo`, `gh_search`) — are removed from the active set at session start, saving ~4.2k tokens of tool schemas per turn (their definitions stay lazily available; Anthropic ≥ 4.5 and OpenAI gpt-5.4+ models get them via native deferred loading at the loader's tool-result position, other models via the full active list).
+To keep the model context lean, not every tool is active by default. All 33 tools are always registered (tests and introspection see them), but 19 of them — the `git-advanced` group (`git_apply`, `git_blame`, `git_cherry_pick`, `git_clean`, `git_clone`, `git_config`, `git_init`, `git_merge`, `git_rebase`, `git_reflog`, `git_revert`, `git_stash`, `git_tag`, `git_worktree`) and the `gh` group (`gh_api`, `gh_issue`, `gh_pr`, `gh_repo`, `gh_search`) — are removed from the active set at session start, saving ~5.3k tokens of tool schemas per turn (their definitions stay lazily available; Anthropic ≥ 4.5 and OpenAI gpt-5.4+ models get them via native deferred loading at the loader's tool-result position, other models via the full active list).
 
 The always-active **`git_tools_activate`** loader re-enables them:
 
@@ -88,7 +88,7 @@ Environment variables:
 | Variable                  | Default           | Description                                                                                                                                                                                           |
 | ------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `PI_GIT_TOOLS_TIMEOUT_MS` | `600000` (10 min) | Per-command timeout in milliseconds. Invalid, zero, negative, or non-integer values use the default.                                                                                                  |
-| `PI_GIT_TOOLS_ACTIVE`     | unset             | Comma-separated tool/group names to keep active from session start (`git-advanced`, `gh`, specific tool names, or `all`). Default: 17 core git tools active; the rare-git and GitHub groups are lazy. |
+| `PI_GIT_TOOLS_ACTIVE`     | unset             | Comma-separated tool/group names to keep active from session start (`git-advanced`, `gh`, specific tool names, or `all`). Default: 13 core git tools active; the rare-git and GitHub groups are lazy. |
 
 ## Output truncation
 

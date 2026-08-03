@@ -29,8 +29,12 @@ const GIT_ADVANCED = [
 	"git_clone",
 	"git_config",
 	"git_init",
+	"git_merge",
+	"git_rebase",
 	"git_reflog",
 	"git_revert",
+	"git_stash",
+	"git_tag",
 	"git_worktree",
 ];
 
