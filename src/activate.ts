@@ -10,9 +10,9 @@
  * Anthropic >= 4.5 / OpenAI gpt-5.4+; full active-list fallback on other
  * hosts, per extensions.md "Dynamic Tool Loading").
  *
- * The lazy split keeps the ~6k tokens of always-on core git tool schemas
+ * The lazy split keeps the ~4.7k tokens of always-on core git tool schemas
  * (including the output-truncation policy suffix appended to every tool
- * description) in the prompt prefix and defers the other ~3.9k (rare git
+ * description) in the prompt prefix and defers the other ~5.3k (rare git
  * operations + all GitHub tools, which need `gh` auth anyway) until the
  * model actually asks for them.
  *
@@ -82,6 +82,18 @@ export const TOOL_CATALOG: ToolCatalogEntry[] = [
 		group: "git-advanced",
 	},
 	{
+		name: "git_merge",
+		summary:
+			"Merge a branch into the current branch, or continue/abort an in-progress merge",
+		group: "git-advanced",
+	},
+	{
+		name: "git_rebase",
+		summary:
+			"Rebase the current branch onto another branch, or continue/abort/skip an in-progress rebase",
+		group: "git-advanced",
+	},
+	{
 		name: "git_reflog",
 		summary: "Show the reflog: where HEAD has pointed (recover lost commits)",
 		group: "git-advanced",
@@ -89,6 +101,16 @@ export const TOOL_CATALOG: ToolCatalogEntry[] = [
 	{
 		name: "git_revert",
 		summary: "Revert a commit by creating an inverse commit",
+		group: "git-advanced",
+	},
+	{
+		name: "git_stash",
+		summary: "Manage stashes: list, push, pop, apply, drop, show",
+		group: "git-advanced",
+	},
+	{
+		name: "git_tag",
+		summary: "List, create, delete, verify tags (lightweight or annotated)",
 		group: "git-advanced",
 	},
 	{
