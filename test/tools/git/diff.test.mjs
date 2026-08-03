@@ -6,8 +6,11 @@ import { after, before, describe, it } from "node:test";
 import {
 	assert,
 	captureTools,
+	execFileSync,
 	execTool,
+	resolve,
 	setupTempRepo,
+	writeFileSync,
 } from "../../helpers.mjs";
 
 const { registerGitTools } = await import("../../../src/git-tools.ts");
@@ -89,6 +92,27 @@ describe("diff", () => {
 			{
 				name: "ValidationError",
 			},
+		);
+	});
+
+	it("git_diff preserves trailing whitespace on the final patch line", async () => {
+		const file = resolve(repoPath, "whitespace.txt");
+		writeFileSync(file, "a\nb   \n");
+		execFileSync("git", ["add", "whitespace.txt"], { cwd: repoPath });
+		execFileSync("git", ["commit", "-q", "-m", "add whitespace fixture"], {
+			cwd: repoPath,
+		});
+		writeFileSync(file, "a\nb   \nc   \n");
+
+		const result = await execTool(gitTools, "git_diff", {
+			path: "whitespace.txt",
+		});
+		const text = result.content[0].text;
+		assert.ok(
+			text.endsWith("+c   "),
+			`final patch line keeps its trailing spaces, got tail: ${JSON.stringify(
+				text.split("\n").slice(-2),
+			)}`,
 		);
 	});
 });

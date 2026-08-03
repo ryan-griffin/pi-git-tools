@@ -8,7 +8,8 @@
  */
 
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { describe, it } from "node:test";
@@ -67,6 +68,69 @@ describe("findRepoRoot error handling", () => {
 				err.message.includes("not installed") ||
 				err.message.includes("not in PATH"),
 		);
+	});
+});
+
+// ---------------------------------------------------------------------------
+// findRepoRoot — success cases
+// ---------------------------------------------------------------------------
+describe("findRepoRoot success", () => {
+	it("returns the repo root, preserving a trailing-space path", async () => {
+		const { findRepoRoot } = await import("../../src/utils.ts");
+		const base = mkdtempSync(resolve(tmpdir(), "pi-git-tools-test-"));
+		const repoPath = resolve(base, "repo ");
+		try {
+			mkdirSync(repoPath, { recursive: true });
+			execFileSync("git", ["init", "-q"], { cwd: repoPath });
+			const root = await findRepoRoot(repoPath);
+			assert.equal(root, repoPath);
+		} finally {
+			rmSync(base, { recursive: true, force: true });
+		}
+	});
+});
+
+// ---------------------------------------------------------------------------
+// run — output whitespace handling
+// ---------------------------------------------------------------------------
+describe("run output whitespace handling", () => {
+	it("strips exactly one trailing line terminator", async () => {
+		const { run } = await import("../../src/utils.ts");
+		assert.equal(await run("printf", ["abc\n"]), "abc");
+		assert.equal(await run("printf", ["abc"]), "abc");
+	});
+
+	it("preserves trailing spaces on the last line", async () => {
+		const { run } = await import("../../src/utils.ts");
+		assert.equal(await run("printf", ["abc   "]), "abc   ");
+		assert.equal(await run("printf", ["abc   \n"]), "abc   ");
+	});
+
+	it("preserves trailing tabs", async () => {
+		const { run } = await import("../../src/utils.ts");
+		assert.equal(await run("printf", ["abc\t\n"]), "abc\t");
+	});
+
+	it("keeps content blank lines (strips only the final terminator)", async () => {
+		const { run } = await import("../../src/utils.ts");
+		assert.equal(await run("printf", ["a\n\n"]), "a\n");
+	});
+
+	it("handles CRLF terminators and lone CR", async () => {
+		const { run } = await import("../../src/utils.ts");
+		assert.equal(await run("printf", ["abc\r\n"]), "abc");
+		assert.equal(await run("printf", ["abc\r"]), "abc\r");
+	});
+
+	it("handles empty and newline-only output", async () => {
+		const { run } = await import("../../src/utils.ts");
+		assert.equal(await run("printf", [""]), "");
+		assert.equal(await run("printf", ["\n"]), "");
+	});
+
+	it("stderr fallback preserves trailing spaces", async () => {
+		const { run } = await import("../../src/utils.ts");
+		assert.equal(await run("sh", ["-c", "printf 'x   ' >&2"]), "x   ");
 	});
 });
 

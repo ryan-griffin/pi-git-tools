@@ -105,4 +105,29 @@ describe("config", () => {
 		});
 		assert.equal(afterResult.details.found, false);
 	});
+
+	it("git_config preserves trailing whitespace in values", async () => {
+		const key = "test.trailing-space";
+		const value = "trailing   ";
+
+		// Set
+		const setResult = await execTool(gitTools, "git_config", {
+			action: "set",
+			name: key,
+			value,
+			scope: "local",
+		});
+		assert.ok(setResult.content[0].text.includes(key));
+
+		// Get it back — trailing spaces must survive the round-trip
+		const getResult = await execTool(gitTools, "git_config", {
+			action: "get",
+			name: key,
+		});
+		assert.equal(getResult.details.value, value);
+		assert.ok(
+			getResult.content[0].text.endsWith("trailing   "),
+			`value retains trailing spaces: "${getResult.content[0].text}"`,
+		);
+	});
 });

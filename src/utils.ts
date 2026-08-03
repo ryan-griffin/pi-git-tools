@@ -68,6 +68,17 @@ const SAFE_ENV: Record<string, string> = {
 	GH_NO_UPDATE_NOTIFIER: "1",
 };
 
+/**
+ * Strip only the trailing line terminator that git/gh append to output.
+ * Unlike trimEnd(), this preserves meaningful trailing whitespace: config
+ * values, repo paths, and patch lines may legitimately end in spaces/tabs.
+ * Exactly one terminator is removed, so content with genuine trailing blank
+ * lines stays faithful. Handles Windows CRLF; a lone CR is left untouched.
+ */
+function stripTrailingTerminator(s: string): string {
+	return s.replace(/\r?\n$/, "");
+}
+
 /** Execute a command, returning stdout (or stderr when stdout is empty). */
 export async function run(
 	bin: string,
@@ -97,8 +108,8 @@ export async function run(
 			stdout: string;
 			stderr: string;
 		};
-		const out = (stdout ?? "").trimEnd();
-		const err = (stderr ?? "").trimEnd();
+		const out = stripTrailingTerminator(stdout ?? "");
+		const err = stripTrailingTerminator(stderr ?? "");
 		// stdout is the machine-readable/primary result; stderr is a fallback for
 		// commands such as clone, fetch, and push that report only progress there.
 		return out || err;
@@ -132,7 +143,9 @@ export async function run(
 			};
 			const stderr = e.stderr || "";
 			const stdout = e.stdout || "";
-			const msg = (stderr || stdout || e.message || String(err)).trim();
+			const msg = stripTrailingTerminator(
+				stderr || stdout || e.message || String(err),
+			);
 			throw new CommandError(msg || String(err), {
 				exitCode: e.code,
 				stdout,
