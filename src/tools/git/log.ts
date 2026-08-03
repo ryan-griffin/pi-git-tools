@@ -101,9 +101,13 @@ export function register(pi: ExtensionAPI) {
 			if (params.graph) args.push("--graph");
 
 			if (params.format === "detailed") {
-				args.push("--format=format:%H%n%an <%ae>%n%ai%n%s%n%b%n---");
+				// %x1e (record separator) marks the start of each commit block so
+				// counting is robust against '---' lines in commit bodies and
+				// --graph line prefixing. It is stripped from the output below.
+				args.push("--format=format:%x1e%H%n%an <%ae>%n%ai%n%s%n%b%n---");
 			} else if (params.format === "full") {
-				args.push("--format=format:%C(auto)%h %s", "--stat");
+				// %C(auto) is a no-op under --no-color; the marker replaces it.
+				args.push("--format=format:%x1e%h %s", "--stat");
 			} else {
 				args.push("--oneline");
 			}
@@ -137,22 +141,21 @@ export function register(pi: ExtensionAPI) {
 				};
 			}
 
-			// Count commits: oneline = count lines; full/detailed = count %H/%h markers
+			// Count commits. oneline: count lines, but with --graph only commit
+			// lines carry the '*' marker (connector lines are |, \, /);
+			// detailed/full: count %x1e sentinels.
 			let commitCount = 0;
 			if (params.format === "oneline" || !params.format) {
 				const lines = output.split("\n").filter(Boolean);
-				commitCount = lines.length;
-			} else if (params.format === "detailed") {
-				commitCount = output.split("\n---").length - 1;
-			} else if (params.format === "full") {
-				// full format starts each commit with a non-indented hash line before stat
-				commitCount = output
-					.split("\n")
-					.filter((l) => /^[a-f0-9]{7,} /.test(l)).length;
+				commitCount = params.graph
+					? lines.filter((l) => l.includes("*")).length
+					: lines.length;
+			} else {
+				commitCount = output.split("\x1e").length - 1;
 			}
 
 			return {
-				content: [{ type: "text", text: output }],
+				content: [{ type: "text", text: output.replaceAll("\x1e", "") }],
 				details: { count: commitCount },
 			};
 		},
