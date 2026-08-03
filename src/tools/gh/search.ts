@@ -30,6 +30,39 @@ function getSearchFields(type: string): string {
 	}
 }
 
+/**
+ * Build the argv for `gh search`. All flags are placed BEFORE the query so a
+ * hyphen-prefixed query (GitHub negation syntax, e.g. '-topic:linux' or
+ * '-label:bug') cannot be misread as a flag by gh's parser; the trailing '--'
+ * marks the query as positional. The separator must stay the last element:
+ * gh treats everything after '--' as the query, so no flag may follow it.
+ */
+export function buildSearchArgs(
+	searchType: string,
+	resultType: string,
+	query: string,
+	limit: number,
+	sort?: string,
+	order?: string,
+): string[] {
+	const args = [
+		"search",
+		searchType,
+		"--limit",
+		String(limit),
+		"--json",
+		getSearchFields(resultType),
+	];
+	if (sort && sort !== "best-match") {
+		args.push("--sort", sort);
+	}
+	if (order) {
+		args.push("--order", order);
+	}
+	args.push("--", query);
+	return args;
+}
+
 /** Format search results for human readability. */
 function formatSearchResults(
 	results: Array<Record<string, unknown>>,
@@ -228,22 +261,20 @@ export function register(pi: ExtensionAPI) {
 								? "commit"
 								: "code";
 
-			const args = [
-				"search",
-				ghType,
-				query,
-				"--limit",
-				String(limit),
-				"--json",
-				getSearchFields(resultType),
-			];
-			if (params.sort && params.sort !== "best-match") {
-				args.push("--sort", params.sort);
-			}
-			if (params.order) {
-				args.push("--order", params.order);
-			}
-			const output = await run("gh", args, root, undefined, _signal);
+			const output = await run(
+				"gh",
+				buildSearchArgs(
+					ghType,
+					resultType,
+					query,
+					limit,
+					params.sort,
+					params.order,
+				),
+				root,
+				undefined,
+				_signal,
+			);
 
 			let parsed: unknown;
 			try {
