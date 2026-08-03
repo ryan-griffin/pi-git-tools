@@ -52,6 +52,19 @@ describe("apply", () => {
 		);
 	});
 
+	it("git_apply enforces the cap in UTF-8 bytes, not UTF-16 code units", async () => {
+		const cap = 10 * 1024 * 1024;
+		// 3.5M CJK chars: ~10 MB of UTF-8, but only 3.5M UTF-16 code units —
+		// under the old .length-based check, over the advertised byte cap.
+		const multibyte = "汉".repeat(3_500_000);
+		assert.ok(multibyte.length < cap, "length under cap");
+		assert.ok(Buffer.byteLength(multibyte, "utf8") > cap, "bytes over cap");
+		await assert.rejects(
+			() => execTool(gitTools, "git_apply", { patch: multibyte }),
+			(err) => /exceeds.*cap/.test(err.message),
+		);
+	});
+
 	it("git_apply applies a patch and check dry-runs", async () => {
 		const target = "apply-me.txt";
 		writeFileSync(resolve(repoPath, target), "line one\n");

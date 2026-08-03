@@ -53,7 +53,9 @@ export function register(pi: ExtensionAPI) {
 			const root = await findRepoRoot(cwd, _signal);
 
 			if (!params.patch) throw new Error("'patch' is required.");
-			if (params.patch.length > MAX_PATCH_BYTES) {
+			// Measure UTF-8 bytes, not UTF-16 code units: tempInputFile writes the
+			// patch as UTF-8, so .length undercounts multibyte content by up to 3x.
+			if (Buffer.byteLength(params.patch, "utf8") > MAX_PATCH_BYTES) {
 				throw new Error(
 					`'patch' exceeds the ${MAX_PATCH_BYTES / 1024 / 1024} MB input cap.`,
 				);
