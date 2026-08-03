@@ -34,6 +34,20 @@ export class CommandError extends Error {
 	}
 }
 
+/**
+ * Error raised when a command is killed by the timeout (PI_GIT_TOOLS_TIMEOUT_MS
+ * or the default) or by host cancellation.
+ *
+ * Distinct from CommandError so callers can propagate genuine execution
+ * failures instead of masking them as missing binaries or other conditions.
+ */
+export class CommandTimeoutError extends Error {
+	constructor(message: string) {
+		super(message);
+		this.name = "CommandTimeoutError";
+	}
+}
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -115,7 +129,7 @@ export async function run(
 		return out || err;
 	} catch (err: unknown) {
 		if (err instanceof Error && err.name === "AbortError") {
-			throw new Error(
+			throw new CommandTimeoutError(
 				`Command '${bin} ${args.join(" ")}' timed out or was cancelled.`,
 			);
 		}

@@ -1,15 +1,16 @@
 /**
  * pi-git-tools — gh-helpers tests.
  *
- * Covers githubRepoFromRemote (host-aware remote URL parsing) and resolveRepo
+ * Covers githubRepoFromRemote (host-aware remote URL parsing), resolveRepo
  * (repo auto-detection from git remotes), including lookalike-host rejection
- * (evilgithub.com etc.) that the previous substring regex got wrong.
+ * (evilgithub.com etc.) that the previous substring regex got wrong, and
+ * requireGh (gh availability + auth checks, timeout preservation).
  */
 import { mkdtempSync, rmSync } from "node:fs";
 import { describe, it } from "node:test";
 import { assert, execFileSync, resolve, tmpdir } from "../helpers.mjs";
 
-const { githubRepoFromRemote, resolveRepo } = await import(
+const { githubRepoFromRemote, requireGh, resolveRepo } = await import(
 	"../../src/tools/gh-helpers.ts"
 );
 
@@ -251,5 +252,89 @@ describe("resolveRepo", () => {
 		} finally {
 			repo.cleanup();
 		}
+	});
+
+	it("preserves timeout errors instead of the generic message", async () => {
+		const repo = makeRepo();
+		const original = process.env.PI_GIT_TOOLS_TIMEOUT_MS;
+		process.env.PI_GIT_TOOLS_TIMEOUT_MS = "1";
+		try {
+			repo.addRemote("origin", "https://github.com/acme/project.git");
+			await assert.rejects(
+				() => resolveRepo(undefined, repo.repoPath),
+				(err) => err.message.includes("timed out or was cancelled"),
+			);
+		} finally {
+			repo.cleanup();
+			if (original === undefined) {
+				delete process.env.PI_GIT_TOOLS_TIMEOUT_MS;
+			} else {
+				process.env.PI_GIT_TOOLS_TIMEOUT_MS = original;
+			}
+		}
+	});
+});
+
+describe("requireGh", () => {
+	/** Run fn with PI_GIT_TOOLS_TIMEOUT_MS set to ms, then restore it. */
+	async function withTimeoutMs(ms, fn) {
+		const original = process.env.PI_GIT_TOOLS_TIMEOUT_MS;
+		process.env.PI_GIT_TOOLS_TIMEOUT_MS = String(ms);
+		try {
+			await fn();
+		} finally {
+			if (original === undefined) {
+				delete process.env.PI_GIT_TOOLS_TIMEOUT_MS;
+			} else {
+				process.env.PI_GIT_TOOLS_TIMEOUT_MS = original;
+			}
+		}
+	}
+
+	/** Run fn with GH_TOKEN set to token, then restore it. */
+	async function withToken(token, fn) {
+		const original = process.env.GH_TOKEN;
+		process.env.GH_TOKEN = token;
+		try {
+			await fn();
+		} finally {
+			if (original === undefined) {
+				delete process.env.GH_TOKEN;
+			} else {
+				process.env.GH_TOKEN = original;
+			}
+		}
+	}
+
+	it("reports a timeout as a timeout, not as a missing gh", async () => {
+		await withTimeoutMs(1, async () => {
+			await assert.rejects(
+				() => requireGh(),
+				(err) =>
+					err.message.includes("timed out or was cancelled") &&
+					!err.message.includes("not installed"),
+			);
+		});
+	});
+
+	it("propagates host cancellation as an execution failure", async () => {
+		await assert.rejects(
+			() => requireGh(undefined, AbortSignal.abort()),
+			(err) => err.message.includes("timed out or was cancelled"),
+		);
+	});
+
+	it("fails fast when the configured token is invalid", async () => {
+		await withToken("invalid-token", async () => {
+			await assert.rejects(
+				() => requireGh(),
+				(err) =>
+					err.message.includes("token") && err.message.includes("invalid"),
+			);
+		});
+	});
+
+	it("returns normally when gh is installed and authenticated", async () => {
+		await requireGh();
 	});
 });

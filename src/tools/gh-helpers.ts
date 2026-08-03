@@ -3,14 +3,16 @@
  *
  * These are used by gh_* tool registrations.
  */
-import { run } from "../utils.js";
+import { CommandTimeoutError, run } from "../utils.js";
 import { validateRepo } from "../validation.js";
 
 export async function requireGh(repoRoot?: string, signal?: AbortSignal) {
 	try {
 		await run("gh", ["--version"], undefined, undefined, signal);
 	} catch (err) {
-		if (signal?.aborted) throw err;
+		// Preserve real execution failures (timeout, host cancellation) instead
+		// of misreporting them as a missing binary.
+		if (err instanceof CommandTimeoutError || signal?.aborted) throw err;
 		throw new Error(
 			"GitHub CLI (gh) is not installed or not in PATH. Install it from https://cli.github.com/",
 		);
@@ -20,17 +22,21 @@ export async function requireGh(repoRoot?: string, signal?: AbortSignal) {
 	try {
 		await run("gh", ["auth", "status"], repoRoot, undefined, signal);
 	} catch (err: unknown) {
-		if (signal?.aborted) throw err;
-		if (
-			err instanceof Error &&
-			(err.message.includes("not logged in") ||
-				err.message.includes("auth login"))
-		) {
-			throw err;
-		}
-		// Other errors (e.g. no network, rate limit) are non-fatal — gh may still work partially
+		if (err instanceof CommandTimeoutError || signal?.aborted) throw err;
 		if (err instanceof Error) {
-			console.warn(`[pi-git-tools] gh auth check warning: ${err.message}`);
+			const message = err.message;
+			// Credential problems are fatal — every subsequent gh call would
+			// fail too — so fail fast with the real message instead of a
+			// confusing 401 further downstream. Covers: not logged in, the
+			// "auth login" hint, failed logins, and invalid/expired tokens.
+			const authFailure =
+				message.includes("not logged in") ||
+				message.includes("auth login") ||
+				/failed to log in/i.test(message) ||
+				/token[^\n]*(?:invalid|expired)/i.test(message);
+			if (authFailure) throw err;
+			// Other errors (e.g. no network, rate limit) are non-fatal — gh may still work partially
+			console.warn(`[pi-git-tools] gh auth check warning: ${message}`);
 		}
 	}
 }
@@ -125,9 +131,10 @@ export async function resolveRepo(
 		}
 		throw new Error("No GitHub remote found.");
 	} catch (err) {
-		if (signal?.aborted) throw err;
-		// Any other failure (git unavailable, not a repository) is reported
-		// generically; malformed remotes were already skipped above.
+		// Preserve real execution failures (timeout, host cancellation); other
+		// failures (git unavailable, not a repository) are reported generically
+		// — malformed remotes were already skipped above.
+		if (err instanceof CommandTimeoutError || signal?.aborted) throw err;
 		throw new Error(
 			"No repository specified and could not detect from git remote.",
 		);
