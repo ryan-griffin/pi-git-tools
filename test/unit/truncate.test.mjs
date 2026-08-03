@@ -206,8 +206,7 @@ describe("capErrorMessage", () => {
 		// 2000 lines with a trailing newline: a naive split("\n") count would
 		// say 2001 lines, but the host's line counting pops the trailing empty
 		// element — nothing is actually dropped, so no footer may appear.
-		const msg =
-			Array.from({ length: 2000 }, (_, i) => `line ${i}`).join("\n") + "\n";
+		const msg = `${Array.from({ length: 2000 }, (_, i) => `line ${i}`).join("\n")}\n`;
 		const err = new Error(msg);
 		capErrorMessage(err);
 		assert.equal(err.message, msg, "boundary message untouched");
