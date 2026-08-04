@@ -100,18 +100,29 @@ export function register(pi: ExtensionAPI) {
 			const count = Math.min(params.count ?? 10, 100);
 			const args = ["log", `-${count}`, "--no-color"];
 			if (params.all) args.push("--all");
-			if (params.decorate) args.push("--decorate=short");
 			if (params.graph) args.push("--graph");
 
 			if (params.format === "detailed") {
 				// %x1e (record separator) marks the start of each commit block so
 				// counting is robust against '---' lines in commit bodies and
 				// --graph line prefixing. It is stripped from the output below.
-				args.push("--format=format:%x1e%H%n%an <%ae>%n%ai%n%s%n%b%n---");
+				// --decorate only applies to git's built-in formats, so ref names
+				// must be baked into the custom format via %d (renders nothing
+				// for commits without refs, and only when decorate is requested).
+				const decorate = params.decorate ? "%d" : "";
+				args.push(
+					`--format=format:%x1e%H${decorate}%n%an <%ae>%n%ai%n%s%n%b%n---`,
+				);
 			} else if (params.format === "full") {
 				// %C(auto) is a no-op under --no-color; the marker replaces it.
-				args.push("--format=format:%x1e%h %s", "--stat");
+				// Same %d treatment as detailed: --decorate is a no-op for
+				// custom formats.
+				const decorate = params.decorate ? "%d" : "";
+				args.push(`--format=format:%x1e%h %s${decorate}`, "--stat");
 			} else {
+				// --oneline is a built-in format, so --decorate works here
+				// (unlike the custom formats above).
+				if (params.decorate) args.push("--decorate=short");
 				args.push("--oneline");
 			}
 
