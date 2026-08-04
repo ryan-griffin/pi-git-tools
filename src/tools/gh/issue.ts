@@ -40,97 +40,100 @@ export function register(pi: ExtensionAPI) {
 		description:
 			"List, view, create, edit, close, reopen, or comment on GitHub issues via the gh CLI.",
 		promptSnippet: "Manage GitHub issues",
-		parameters: Type.Object({
-			action: Type.Optional(
-				Type.Union(
-					[
-						Type.Literal("list"),
-						Type.Literal("view"),
-						Type.Literal("create"),
-						Type.Literal("edit"),
-						Type.Literal("close"),
-						Type.Literal("reopen"),
-						Type.Literal("comment"),
-					],
-					{
-						description:
-							"Action: 'list' (default), 'view', 'create', 'edit', 'close', 'reopen', or 'comment'.",
-					},
+		parameters: Type.Object(
+			{
+				action: Type.Optional(
+					Type.Union(
+						[
+							Type.Literal("list"),
+							Type.Literal("view"),
+							Type.Literal("create"),
+							Type.Literal("edit"),
+							Type.Literal("close"),
+							Type.Literal("reopen"),
+							Type.Literal("comment"),
+						],
+						{
+							description:
+								"Action: 'list' (default), 'view', 'create', 'edit', 'close', 'reopen', or 'comment'.",
+						},
+					),
 				),
-			),
-			repo: Type.Optional(
-				Type.String({
-					description:
-						"Repository in 'owner/repo' format. Defaults to the current git remote.",
-				}),
-			),
-			number: Type.Optional(
-				Type.Integer({
-					description:
-						"Issue number (required for view/edit/close/reopen/comment).",
-					minimum: 1,
-				}),
-			),
-			state: Type.Optional(
-				Type.Union(
-					[Type.Literal("open"), Type.Literal("closed"), Type.Literal("all")],
-					{
+				repo: Type.Optional(
+					Type.String({
 						description:
-							"Filter by state for 'list': 'open' (default), 'closed', or 'all'.",
-					},
+							"Repository in 'owner/repo' format. Defaults to the current git remote.",
+					}),
 				),
-			),
-			limit: Type.Optional(
-				Type.Integer({
-					description: "Max issues to list (default: 20, max: 100).",
-					minimum: 1,
-					maximum: 100,
-				}),
-			),
-			title: Type.Optional(
-				Type.String({
-					description:
-						"Issue title (required for 'create', optional for 'edit').",
-				}),
-			),
-			body: Type.Optional(
-				Type.String({
-					description:
-						"Issue body (for 'create'/'edit'/'comment'; close comment for 'close'). Defaults to empty string for create.",
-				}),
-			),
-			label: Type.Optional(
-				Type.String({
-					description: "Issue labels (comma-separated, for 'create').",
-				}),
-			),
-			assignee: Type.Optional(
-				Type.String({
-					description:
-						"Assignee login(s), comma-separated (for 'create'). Use '@me' for self.",
-				}),
-			),
-			addLabel: Type.Optional(
-				Type.String({
-					description: "Comma-separated labels to add (for 'edit').",
-				}),
-			),
-			removeLabel: Type.Optional(
-				Type.String({
-					description: "Comma-separated labels to remove (for 'edit').",
-				}),
-			),
-			addAssignee: Type.Optional(
-				Type.String({
-					description: "Comma-separated assignees to add (for 'edit').",
-				}),
-			),
-			removeAssignee: Type.Optional(
-				Type.String({
-					description: "Comma-separated assignees to remove (for 'edit').",
-				}),
-			),
-		}),
+				number: Type.Optional(
+					Type.Integer({
+						description:
+							"Issue number (required for view/edit/close/reopen/comment).",
+						minimum: 1,
+					}),
+				),
+				state: Type.Optional(
+					Type.Union(
+						[Type.Literal("open"), Type.Literal("closed"), Type.Literal("all")],
+						{
+							description:
+								"Filter by state for 'list': 'open' (default), 'closed', or 'all'.",
+						},
+					),
+				),
+				limit: Type.Optional(
+					Type.Integer({
+						description: "Max issues to list (default: 20, max: 100).",
+						minimum: 1,
+						maximum: 100,
+					}),
+				),
+				title: Type.Optional(
+					Type.String({
+						description:
+							"Issue title (required for 'create', optional for 'edit').",
+					}),
+				),
+				body: Type.Optional(
+					Type.String({
+						description:
+							"Issue body (for 'create'/'edit'/'comment'; close comment for 'close'). Defaults to empty string for create.",
+					}),
+				),
+				label: Type.Optional(
+					Type.String({
+						description: "Issue labels (comma-separated, for 'create').",
+					}),
+				),
+				assignee: Type.Optional(
+					Type.String({
+						description:
+							"Assignee login(s), comma-separated (for 'create'). Use '@me' for self.",
+					}),
+				),
+				addLabel: Type.Optional(
+					Type.String({
+						description: "Comma-separated labels to add (for 'edit').",
+					}),
+				),
+				removeLabel: Type.Optional(
+					Type.String({
+						description: "Comma-separated labels to remove (for 'edit').",
+					}),
+				),
+				addAssignee: Type.Optional(
+					Type.String({
+						description: "Comma-separated assignees to add (for 'edit').",
+					}),
+				),
+				removeAssignee: Type.Optional(
+					Type.String({
+						description: "Comma-separated assignees to remove (for 'edit').",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			// Pure validation first: no gh roundtrip for a request that is

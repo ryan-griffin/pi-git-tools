@@ -15,31 +15,34 @@ export function register(pi: ExtensionAPI) {
 			"Show a commit, tag, or other object — metadata and patch. Defaults to HEAD. " +
 			"Use stat: true for a diffstat summary instead of the full patch.",
 		promptSnippet: "Show commit details",
-		parameters: Type.Object({
-			ref: Type.Optional(
-				Type.String({
-					description:
-						"Commit-ish to show (default: HEAD). E.g. 'abc123', 'HEAD~1', 'v1.0.0'.",
-				}),
-			),
-			path: Type.Optional(
-				Type.String({
-					description:
-						"Optional path to limit the shown patch (e.g. 'src/index.ts').",
-				}),
-			),
-			stat: Type.Optional(
-				Type.Boolean({
-					description:
-						"Show diffstat summary instead of the full patch (--stat).",
-				}),
-			),
-			nameOnly: Type.Optional(
-				Type.Boolean({
-					description: "Show only names of changed files (--name-only).",
-				}),
-			),
-		}),
+		parameters: Type.Object(
+			{
+				ref: Type.Optional(
+					Type.String({
+						description:
+							"Commit-ish to show (default: HEAD). E.g. 'abc123', 'HEAD~1', 'v1.0.0'.",
+					}),
+				),
+				path: Type.Optional(
+					Type.String({
+						description:
+							"Optional path to limit the shown patch (e.g. 'src/index.ts').",
+					}),
+				),
+				stat: Type.Optional(
+					Type.Boolean({
+						description:
+							"Show diffstat summary instead of the full patch (--stat).",
+					}),
+				),
+				nameOnly: Type.Optional(
+					Type.Boolean({
+						description: "Show only names of changed files (--name-only).",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);

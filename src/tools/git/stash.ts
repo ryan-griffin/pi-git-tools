@@ -27,60 +27,63 @@ export function register(pi: ExtensionAPI) {
 		description:
 			"Manage stashes: list, push (save), pop, apply, drop, or show a stash.",
 		promptSnippet: "Manage stashes",
-		parameters: Type.Object({
-			action: Type.Optional(
-				Type.Union(
-					[
-						Type.Literal("list"),
-						Type.Literal("push"),
-						Type.Literal("pop"),
-						Type.Literal("apply"),
-						Type.Literal("drop"),
-						Type.Literal("show"),
-					],
-					{
-						description:
-							"Action: 'list' (default), 'push', 'pop', 'apply', 'drop', or 'show'.",
-					},
+		parameters: Type.Object(
+			{
+				action: Type.Optional(
+					Type.Union(
+						[
+							Type.Literal("list"),
+							Type.Literal("push"),
+							Type.Literal("pop"),
+							Type.Literal("apply"),
+							Type.Literal("drop"),
+							Type.Literal("show"),
+						],
+						{
+							description:
+								"Action: 'list' (default), 'push', 'pop', 'apply', 'drop', or 'show'.",
+						},
+					),
 				),
-			),
-			message: Type.Optional(
-				Type.String({
-					description: "Optional message for 'push' action.",
-				}),
-			),
-			index: Type.Optional(
-				Type.Integer({
-					description:
-						"Stash index for pop/apply/drop/show (0-based, default: 0 for most recent).",
-					minimum: 0,
-				}),
-			),
-			patch: Type.Optional(
-				Type.Boolean({
-					description:
-						"Show full diff (patch) instead of a summary (for 'show' action).",
-				}),
-			),
-			includeUntracked: Type.Optional(
-				Type.Boolean({
-					description:
-						"Include untracked files in the stash (for 'push' action).",
-				}),
-			),
-			keepIndex: Type.Optional(
-				Type.Boolean({
-					description:
-						"Keep the index intact while stashing (for 'push' action).",
-				}),
-			),
-			paths: Type.Optional(
-				Type.Array(Type.String(), {
-					description:
-						"Paths to stash selectively (for 'push' action, e.g. ['src/a.ts', 'test/']). Everything else stays in the working tree.",
-				}),
-			),
-		}),
+				message: Type.Optional(
+					Type.String({
+						description: "Optional message for 'push' action.",
+					}),
+				),
+				index: Type.Optional(
+					Type.Integer({
+						description:
+							"Stash index for pop/apply/drop/show (0-based, default: 0 for most recent).",
+						minimum: 0,
+					}),
+				),
+				patch: Type.Optional(
+					Type.Boolean({
+						description:
+							"Show full diff (patch) instead of a summary (for 'show' action).",
+					}),
+				),
+				includeUntracked: Type.Optional(
+					Type.Boolean({
+						description:
+							"Include untracked files in the stash (for 'push' action).",
+					}),
+				),
+				keepIndex: Type.Optional(
+					Type.Boolean({
+						description:
+							"Keep the index intact while stashing (for 'push' action).",
+					}),
+				),
+				paths: Type.Optional(
+					Type.Array(Type.String(), {
+						description:
+							"Paths to stash selectively (for 'push' action, e.g. ['src/a.ts', 'test/']). Everything else stays in the working tree.",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);

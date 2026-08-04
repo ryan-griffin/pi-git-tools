@@ -27,56 +27,59 @@ export function register(pi: ExtensionAPI) {
 		description:
 			"Create, list, delete, or verify tags. Supports lightweight and annotated tags.",
 		promptSnippet: "Manage tags",
-		parameters: Type.Object({
-			action: Type.Optional(
-				Type.Union(
-					[
-						Type.Literal("list"),
-						Type.Literal("create"),
-						Type.Literal("delete"),
-						Type.Literal("verify"),
-					],
-					{
-						description:
-							"Action: 'list' (default), 'create', 'delete', or 'verify'.",
-					},
+		parameters: Type.Object(
+			{
+				action: Type.Optional(
+					Type.Union(
+						[
+							Type.Literal("list"),
+							Type.Literal("create"),
+							Type.Literal("delete"),
+							Type.Literal("verify"),
+						],
+						{
+							description:
+								"Action: 'list' (default), 'create', 'delete', or 'verify'.",
+						},
+					),
 				),
-			),
-			name: Type.Optional(
-				Type.String({
-					description: "Tag name (required for create/delete/verify).",
-				}),
-			),
-			target: Type.Optional(
-				Type.String({
-					description:
-						"Commit, branch, or ref to tag (for 'create'). Defaults to HEAD.",
-				}),
-			),
-			message: Type.Optional(
-				Type.String({
-					description:
-						"Annotation message for an annotated tag (for 'create'). Omit for a lightweight tag.",
-				}),
-			),
-			force: Type.Optional(
-				Type.Boolean({
-					description:
-						"Force-create the tag over an existing one (-f). Only for 'create' action.",
-				}),
-			),
-			sign: Type.Optional(
-				Type.Boolean({
-					description: "GPG-sign the tag (-s). Only for 'create' action.",
-				}),
-			),
-			listPattern: Type.Optional(
-				Type.String({
-					description:
-						"Only list tags matching this pattern (-l, e.g. 'v2.*'). For 'list' action.",
-				}),
-			),
-		}),
+				name: Type.Optional(
+					Type.String({
+						description: "Tag name (required for create/delete/verify).",
+					}),
+				),
+				target: Type.Optional(
+					Type.String({
+						description:
+							"Commit, branch, or ref to tag (for 'create'). Defaults to HEAD.",
+					}),
+				),
+				message: Type.Optional(
+					Type.String({
+						description:
+							"Annotation message for an annotated tag (for 'create'). Omit for a lightweight tag.",
+					}),
+				),
+				force: Type.Optional(
+					Type.Boolean({
+						description:
+							"Force-create the tag over an existing one (-f). Only for 'create' action.",
+					}),
+				),
+				sign: Type.Optional(
+					Type.Boolean({
+						description: "GPG-sign the tag (-s). Only for 'create' action.",
+					}),
+				),
+				listPattern: Type.Optional(
+					Type.String({
+						description:
+							"Only list tags matching this pattern (-l, e.g. 'v2.*'). For 'list' action.",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);

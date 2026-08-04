@@ -14,56 +14,59 @@ export function register(pi: ExtensionAPI) {
 		description:
 			"Fetch from a remote repository. Defaults to the current branch's upstream (origin when none is set).",
 		promptSnippet: "Fetch from remote",
-		parameters: Type.Object({
-			remote: Type.Optional(
-				Type.String({
-					description:
-						"Remote name (default: current branch's upstream, else origin).",
-					minLength: 1,
-				}),
-			),
-			branch: Type.Optional(
-				Type.String({
-					description: "Branch to fetch (default: all branches).",
-					minLength: 1,
-				}),
-			),
-			prune: Type.Optional(
-				Type.Boolean({
-					description:
-						"Prune remote-tracking branches no longer present on remote (--prune).",
-				}),
-			),
-			depth: Type.Optional(
-				Type.Integer({
-					description: "Depth of history to fetch (shallow fetch).",
-					minimum: 1,
-				}),
-			),
-			all: Type.Optional(
-				Type.Boolean({
-					description: "Fetch from all remotes (--all).",
-				}),
-			),
-			tags: Type.Optional(
-				Type.Boolean({
-					description:
-						"Fetch all tags from the remote (--tags). Mutually exclusive with noTags.",
-				}),
-			),
-			noTags: Type.Optional(
-				Type.Boolean({
-					description:
-						"Do not fetch any tags from the remote (--no-tags). Mutually exclusive with tags.",
-				}),
-			),
-			unshallow: Type.Optional(
-				Type.Boolean({
-					description:
-						"Convert an existing shallow repository to a complete one (--unshallow). Cannot be combined with depth.",
-				}),
-			),
-		}),
+		parameters: Type.Object(
+			{
+				remote: Type.Optional(
+					Type.String({
+						description:
+							"Remote name (default: current branch's upstream, else origin).",
+						minLength: 1,
+					}),
+				),
+				branch: Type.Optional(
+					Type.String({
+						description: "Branch to fetch (default: all branches).",
+						minLength: 1,
+					}),
+				),
+				prune: Type.Optional(
+					Type.Boolean({
+						description:
+							"Prune remote-tracking branches no longer present on remote (--prune).",
+					}),
+				),
+				depth: Type.Optional(
+					Type.Integer({
+						description: "Depth of history to fetch (shallow fetch).",
+						minimum: 1,
+					}),
+				),
+				all: Type.Optional(
+					Type.Boolean({
+						description: "Fetch from all remotes (--all).",
+					}),
+				),
+				tags: Type.Optional(
+					Type.Boolean({
+						description:
+							"Fetch all tags from the remote (--tags). Mutually exclusive with noTags.",
+					}),
+				),
+				noTags: Type.Optional(
+					Type.Boolean({
+						description:
+							"Do not fetch any tags from the remote (--no-tags). Mutually exclusive with tags.",
+					}),
+				),
+				unshallow: Type.Optional(
+					Type.Boolean({
+						description:
+							"Convert an existing shallow repository to a complete one (--unshallow). Cannot be combined with depth.",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);

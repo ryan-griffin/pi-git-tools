@@ -15,37 +15,40 @@ export function register(pi: ExtensionAPI) {
 			"Remove untracked files from the working tree. Use with caution — can delete files permanently. " +
 			"force: true is always required to actually remove files; use dryRun: true to preview first.",
 		promptSnippet: "Remove untracked files",
-		parameters: Type.Object({
-			dryRun: Type.Optional(
-				Type.Boolean({
-					description:
-						"Show what would be removed without actually removing (--dry-run).",
-				}),
-			),
-			force: Type.Optional(
-				Type.Boolean({
-					description:
-						"Force removal of untracked files (-f). Always required to actually remove files (unless dryRun).",
-				}),
-			),
-			directories: Type.Optional(
-				Type.Boolean({
-					description: "Remove untracked directories as well (-d).",
-				}),
-			),
-			excludePattern: Type.Optional(
-				Type.String({
-					description:
-						"Skip files matching this pattern (--exclude). Comma-separated for multiple patterns.",
-				}),
-			),
-			interactive: Type.Optional(
-				Type.Boolean({
-					description:
-						"Show files interactively for confirmation (-i). Refuses to run in non-TTY environments.",
-				}),
-			),
-		}),
+		parameters: Type.Object(
+			{
+				dryRun: Type.Optional(
+					Type.Boolean({
+						description:
+							"Show what would be removed without actually removing (--dry-run).",
+					}),
+				),
+				force: Type.Optional(
+					Type.Boolean({
+						description:
+							"Force removal of untracked files (-f). Always required to actually remove files (unless dryRun).",
+					}),
+				),
+				directories: Type.Optional(
+					Type.Boolean({
+						description: "Remove untracked directories as well (-d).",
+					}),
+				),
+				excludePattern: Type.Optional(
+					Type.String({
+						description:
+							"Skip files matching this pattern (--exclude). Comma-separated for multiple patterns.",
+					}),
+				),
+				interactive: Type.Optional(
+					Type.Boolean({
+						description:
+							"Show files interactively for confirmation (-i). Refuses to run in non-TTY environments.",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);

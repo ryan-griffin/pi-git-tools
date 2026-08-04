@@ -25,44 +25,48 @@ export function register(pi: ExtensionAPI) {
 		description:
 			"Cherry-pick commits onto the current branch, or continue/abort/skip an in-progress cherry-pick.",
 		promptSnippet: "Cherry-pick commits",
-		parameters: Type.Object({
-			action: Type.Optional(
-				Type.Union(
-					[
-						Type.Literal("pick"),
-						Type.Literal("continue"),
-						Type.Literal("abort"),
-						Type.Literal("skip"),
-					],
-					{
-						description:
-							"Action: 'pick' (default), 'continue', 'abort', or 'skip' (during conflict).",
-					},
+		parameters: Type.Object(
+			{
+				action: Type.Optional(
+					Type.Union(
+						[
+							Type.Literal("pick"),
+							Type.Literal("continue"),
+							Type.Literal("abort"),
+							Type.Literal("skip"),
+						],
+						{
+							description:
+								"Action: 'pick' (default), 'continue', 'abort', or 'skip' (during conflict).",
+						},
+					),
 				),
-			),
-			commits: Type.Optional(
-				Type.Array(Type.String(), {
-					description:
-						"Commit ref(s) to cherry-pick (e.g. ['abc123', 'def456']). Required for action=pick.",
-				}),
-			),
-			noCommit: Type.Optional(
-				Type.Boolean({
-					description: "Apply changes without creating a commit (--no-commit).",
-				}),
-			),
-			signoff: Type.Optional(
-				Type.Boolean({
-					description: "Add Signed-off-by line (--signoff).",
-				}),
-			),
-			edit: Type.Optional(
-				Type.Boolean({
-					description:
-						"Edit commit message (--edit). Not supported headlessly — will error if true.",
-				}),
-			),
-		}),
+				commits: Type.Optional(
+					Type.Array(Type.String(), {
+						description:
+							"Commit ref(s) to cherry-pick (e.g. ['abc123', 'def456']). Required for action=pick.",
+					}),
+				),
+				noCommit: Type.Optional(
+					Type.Boolean({
+						description:
+							"Apply changes without creating a commit (--no-commit).",
+					}),
+				),
+				signoff: Type.Optional(
+					Type.Boolean({
+						description: "Add Signed-off-by line (--signoff).",
+					}),
+				),
+				edit: Type.Optional(
+					Type.Boolean({
+						description:
+							"Edit commit message (--edit). Not supported headlessly — will error if true.",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);

@@ -16,57 +16,60 @@ export function register(pi: ExtensionAPI) {
 			"Supports optional path filtering, --stat, --name-only, and --word-diff. " +
 			"Pass 'ref' to diff against a commit, or a range like 'main...HEAD'.",
 		promptSnippet: "Show file changes",
-		parameters: Type.Object({
-			staged: Type.Optional(
-				Type.Boolean({
-					description:
-						"Show staged changes (--cached) instead of unstaged changes. " +
-						"Can be combined with 'ref' to compare the index against a commit.",
-				}),
-			),
-			ref: Type.Optional(
-				Type.String({
-					description:
-						"Commit-ish to diff against the working tree, or a range (e.g. 'main', 'HEAD~1', 'main..HEAD', 'main...HEAD').",
-				}),
-			),
-			ref2: Type.Optional(
-				Type.String({
-					description:
-						"Optional second endpoint for a two-commit diff (e.g. ref='main' ref2='feature'). Not valid with a range in 'ref'.",
-				}),
-			),
-			path: Type.Optional(
-				Type.String({
-					description:
-						"Optional path or glob to filter the diff (e.g. 'src/', '*.ts').",
-				}),
-			),
-			contextLines: Type.Optional(
-				Type.Integer({
-					description:
-						"Number of context lines (default: 3, pass 0 for minimal, -1 for full file). Use -U0 for no context, -U3 default.",
-					minimum: -1,
-				}),
-			),
-			stat: Type.Optional(
-				Type.Boolean({
-					description:
-						"Show diffstat summary instead of the full patch (--stat).",
-				}),
-			),
-			nameOnly: Type.Optional(
-				Type.Boolean({
-					description: "Show only names of changed files (--name-only).",
-				}),
-			),
-			wordDiff: Type.Optional(
-				Type.Boolean({
-					description:
-						"Show word-level changes instead of line-level (--word-diff).",
-				}),
-			),
-		}),
+		parameters: Type.Object(
+			{
+				staged: Type.Optional(
+					Type.Boolean({
+						description:
+							"Show staged changes (--cached) instead of unstaged changes. " +
+							"Can be combined with 'ref' to compare the index against a commit.",
+					}),
+				),
+				ref: Type.Optional(
+					Type.String({
+						description:
+							"Commit-ish to diff against the working tree, or a range (e.g. 'main', 'HEAD~1', 'main..HEAD', 'main...HEAD').",
+					}),
+				),
+				ref2: Type.Optional(
+					Type.String({
+						description:
+							"Optional second endpoint for a two-commit diff (e.g. ref='main' ref2='feature'). Not valid with a range in 'ref'.",
+					}),
+				),
+				path: Type.Optional(
+					Type.String({
+						description:
+							"Optional path or glob to filter the diff (e.g. 'src/', '*.ts').",
+					}),
+				),
+				contextLines: Type.Optional(
+					Type.Integer({
+						description:
+							"Number of context lines (default: 3, pass 0 for minimal, -1 for full file). Use -U0 for no context, -U3 default.",
+						minimum: -1,
+					}),
+				),
+				stat: Type.Optional(
+					Type.Boolean({
+						description:
+							"Show diffstat summary instead of the full patch (--stat).",
+					}),
+				),
+				nameOnly: Type.Optional(
+					Type.Boolean({
+						description: "Show only names of changed files (--name-only).",
+					}),
+				),
+				wordDiff: Type.Optional(
+					Type.Boolean({
+						description:
+							"Show word-level changes instead of line-level (--word-diff).",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);

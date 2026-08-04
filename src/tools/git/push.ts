@@ -14,68 +14,71 @@ export function register(pi: ExtensionAPI) {
 		description:
 			"Push local commits to a remote repository. Supports setting upstream, force push, and dry-run.",
 		promptSnippet: "Push commits to remote",
-		parameters: Type.Object({
-			remote: Type.Optional(
-				Type.String({
-					description:
-						"Remote name. Defaults to the current branch's upstream; origin when 'branch' or 'deleteBranch' is given.",
-					minLength: 1,
-				}),
-			),
-			branch: Type.Optional(
-				Type.String({
-					description: "Branch to push (default: current branch).",
-					minLength: 1,
-				}),
-			),
-			setUpstream: Type.Optional(
-				Type.Boolean({
-					description: "Set the upstream tracking reference (-u).",
-				}),
-			),
-			force: Type.Optional(
-				Type.Boolean({
-					description:
-						"Force push (use with caution — prefer force-with-lease). Cannot be used together with forceWithLease.",
-				}),
-			),
-			forceWithLease: Type.Optional(
-				Type.Boolean({
-					description:
-						"Force push with lease (safer than force). Cannot be used together with force.",
-				}),
-			),
-			dryRun: Type.Optional(
-				Type.Boolean({
-					description:
-						"Dry run — show what would be pushed without actually pushing.",
-				}),
-			),
-			deleteBranch: Type.Optional(
-				Type.String({
-					description:
-						"Delete a remote branch (e.g. 'feature/old-branch'). Cannot be used with 'branch'.",
-					minLength: 1,
-				}),
-			),
-			tags: Type.Optional(
-				Type.Boolean({
-					description: "Push all tags (--tags).",
-				}),
-			),
-			followTags: Type.Optional(
-				Type.Boolean({
-					description:
-						"Push missing tags reachable from pushed commits (--follow-tags).",
-				}),
-			),
-			forceIfIncludes: Type.Optional(
-				Type.Boolean({
-					description:
-						"Force push only if the remote ref is an ancestor of the local ref (--force-if-includes).",
-				}),
-			),
-		}),
+		parameters: Type.Object(
+			{
+				remote: Type.Optional(
+					Type.String({
+						description:
+							"Remote name. Defaults to the current branch's upstream; origin when 'branch' or 'deleteBranch' is given.",
+						minLength: 1,
+					}),
+				),
+				branch: Type.Optional(
+					Type.String({
+						description: "Branch to push (default: current branch).",
+						minLength: 1,
+					}),
+				),
+				setUpstream: Type.Optional(
+					Type.Boolean({
+						description: "Set the upstream tracking reference (-u).",
+					}),
+				),
+				force: Type.Optional(
+					Type.Boolean({
+						description:
+							"Force push (use with caution — prefer force-with-lease). Cannot be used together with forceWithLease.",
+					}),
+				),
+				forceWithLease: Type.Optional(
+					Type.Boolean({
+						description:
+							"Force push with lease (safer than force). Cannot be used together with force.",
+					}),
+				),
+				dryRun: Type.Optional(
+					Type.Boolean({
+						description:
+							"Dry run — show what would be pushed without actually pushing.",
+					}),
+				),
+				deleteBranch: Type.Optional(
+					Type.String({
+						description:
+							"Delete a remote branch (e.g. 'feature/old-branch'). Cannot be used with 'branch'.",
+						minLength: 1,
+					}),
+				),
+				tags: Type.Optional(
+					Type.Boolean({
+						description: "Push all tags (--tags).",
+					}),
+				),
+				followTags: Type.Optional(
+					Type.Boolean({
+						description:
+							"Push missing tags reachable from pushed commits (--follow-tags).",
+					}),
+				),
+				forceIfIncludes: Type.Optional(
+					Type.Boolean({
+						description:
+							"Force push only if the remote ref is an ancestor of the local ref (--force-if-includes).",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);

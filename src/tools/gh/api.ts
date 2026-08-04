@@ -21,41 +21,45 @@ export function register(pi: ExtensionAPI) {
 		description:
 			"Call any GitHub REST API endpoint via `gh api` (e.g. /repos/{owner}/{repo}/releases, /user). Use 'data' for a JSON body, 'params' for query parameters.",
 		promptSnippet: "Call the GitHub REST API",
-		parameters: Type.Object({
-			method: Type.Optional(
-				Type.String({
+		parameters: Type.Object(
+			{
+				method: Type.Optional(
+					Type.String({
+						description:
+							"HTTP method (default: GET). One of GET, POST, PATCH, PUT, DELETE.",
+					}),
+				),
+				path: Type.String({
 					description:
-						"HTTP method (default: GET). One of GET, POST, PATCH, PUT, DELETE.",
+						"API endpoint path, starting with '/'. Use {owner}/{repo} placeholders for the current repository (e.g. '/repos/{owner}/{repo}/issues/1/comments').",
 				}),
-			),
-			path: Type.String({
-				description:
-					"API endpoint path, starting with '/'. Use {owner}/{repo} placeholders for the current repository (e.g. '/repos/{owner}/{repo}/issues/1/comments').",
-			}),
-			data: Type.Optional(
-				Type.String({
-					description:
-						'JSON request body for POST/PATCH/PUT (e.g. \'{"title":"Fix bug"}\'). Must be valid JSON when provided.',
-				}),
-			),
-			params: Type.Optional(
-				Type.Record(Type.String(), Type.String(), {
-					description:
-						"Query/form parameters as key-value pairs (e.g. { per_page: '100' }), passed as -f key=value.",
-				}),
-			),
-			field: Type.Optional(
-				Type.String({
-					description:
-						"Optional jq expression to extract from the response (e.g. '.[0].sha' or '.id').",
-				}),
-			),
-			paginate: Type.Optional(
-				Type.Boolean({
-					description: "Automatically fetch all pages of results (--paginate).",
-				}),
-			),
-		}),
+				data: Type.Optional(
+					Type.String({
+						description:
+							'JSON request body for POST/PATCH/PUT (e.g. \'{"title":"Fix bug"}\'). Must be valid JSON when provided.',
+					}),
+				),
+				params: Type.Optional(
+					Type.Record(Type.String(), Type.String(), {
+						description:
+							"Query/form parameters as key-value pairs (e.g. { per_page: '100' }), passed as -f key=value.",
+					}),
+				),
+				field: Type.Optional(
+					Type.String({
+						description:
+							"Optional jq expression to extract from the response (e.g. '.[0].sha' or '.id').",
+					}),
+				),
+				paginate: Type.Optional(
+					Type.Boolean({
+						description:
+							"Automatically fetch all pages of results (--paginate).",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRootBestEffort(cwd, _signal);

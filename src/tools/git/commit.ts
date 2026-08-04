@@ -15,34 +15,38 @@ export function register(pi: ExtensionAPI) {
 			"Create a commit. Can stage specific paths first, amend the last commit, or create an empty commit. " +
 			"Use git_add for broader staging (staging is always explicit).",
 		promptSnippet: "Stage and commit changes",
-		parameters: Type.Object({
-			message: Type.Optional(
-				Type.String({
-					description:
-						"Commit message (optional when amending without changing message).",
-				}),
-			),
-			paths: Type.Optional(
-				Type.Array(Type.String(), {
-					description: "Specific paths to stage before committing.",
-				}),
-			),
-			amend: Type.Optional(
-				Type.Boolean({
-					description: "Amend the last commit instead of creating a new one.",
-				}),
-			),
-			allowEmpty: Type.Optional(
-				Type.Boolean({
-					description: "Allow an empty commit (--allow-empty).",
-				}),
-			),
-			signoff: Type.Optional(
-				Type.Boolean({
-					description: "Add Signed-off-by line (--signoff) for DCO compliance.",
-				}),
-			),
-		}),
+		parameters: Type.Object(
+			{
+				message: Type.Optional(
+					Type.String({
+						description:
+							"Commit message (optional when amending without changing message).",
+					}),
+				),
+				paths: Type.Optional(
+					Type.Array(Type.String(), {
+						description: "Specific paths to stage before committing.",
+					}),
+				),
+				amend: Type.Optional(
+					Type.Boolean({
+						description: "Amend the last commit instead of creating a new one.",
+					}),
+				),
+				allowEmpty: Type.Optional(
+					Type.Boolean({
+						description: "Allow an empty commit (--allow-empty).",
+					}),
+				),
+				signoff: Type.Optional(
+					Type.Boolean({
+						description:
+							"Add Signed-off-by line (--signoff) for DCO compliance.",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);

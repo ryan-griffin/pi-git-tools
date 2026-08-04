@@ -29,65 +29,68 @@ export function register(pi: ExtensionAPI) {
 		description:
 			"Get, set, add, list, unset, or remove git configuration values. Supports local, global, and system scopes.",
 		promptSnippet: "Manage git configuration",
-		parameters: Type.Object({
-			action: Type.Optional(
-				Type.Union(
-					[
-						Type.Literal("get"),
-						Type.Literal("set"),
-						Type.Literal("list"),
-						Type.Literal("unset"),
-						Type.Literal("add"),
-						Type.Literal("unset-all"),
-						Type.Literal("remove-section"),
-					],
-					{
-						description:
-							"Action: 'get' (default), 'set', 'list', 'unset', 'add', 'unset-all', or 'remove-section'.",
-					},
+		parameters: Type.Object(
+			{
+				action: Type.Optional(
+					Type.Union(
+						[
+							Type.Literal("get"),
+							Type.Literal("set"),
+							Type.Literal("list"),
+							Type.Literal("unset"),
+							Type.Literal("add"),
+							Type.Literal("unset-all"),
+							Type.Literal("remove-section"),
+						],
+						{
+							description:
+								"Action: 'get' (default), 'set', 'list', 'unset', 'add', 'unset-all', or 'remove-section'.",
+						},
+					),
 				),
-			),
-			name: Type.Optional(
-				Type.String({
-					description:
-						"Config key name (e.g. 'user.name', 'user.email'). Required for get/set/unset.",
-				}),
-			),
-			value: Type.Optional(
-				Type.String({
-					description:
-						"Config value (required for 'set'/'add'; optional regex filter for 'unset-all').",
-				}),
-			),
-			scope: Type.Optional(
-				Type.Union(
-					[
-						Type.Literal("local"),
-						Type.Literal("global"),
-						Type.Literal("system"),
-					],
-					{
+				name: Type.Optional(
+					Type.String({
 						description:
-							"Config scope: 'local' (default), 'global', or 'system'.",
-					},
+							"Config key name (e.g. 'user.name', 'user.email'). Required for get/set/unset.",
+					}),
 				),
-			),
-			type: Type.Optional(
-				Type.Union(
-					[
-						Type.Literal("bool"),
-						Type.Literal("int"),
-						Type.Literal("path"),
-						Type.Literal("expiry-date"),
-						Type.Literal("color"),
-					],
-					{
+				value: Type.Optional(
+					Type.String({
 						description:
-							"Value type hint: 'bool', 'int', 'path', 'expiry-date', 'color'.",
-					},
+							"Config value (required for 'set'/'add'; optional regex filter for 'unset-all').",
+					}),
 				),
-			),
-		}),
+				scope: Type.Optional(
+					Type.Union(
+						[
+							Type.Literal("local"),
+							Type.Literal("global"),
+							Type.Literal("system"),
+						],
+						{
+							description:
+								"Config scope: 'local' (default), 'global', or 'system'.",
+						},
+					),
+				),
+				type: Type.Optional(
+					Type.Union(
+						[
+							Type.Literal("bool"),
+							Type.Literal("int"),
+							Type.Literal("path"),
+							Type.Literal("expiry-date"),
+							Type.Literal("color"),
+						],
+						{
+							description:
+								"Value type hint: 'bool', 'int', 'path', 'expiry-date', 'color'.",
+						},
+					),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const action = params.action || "get";

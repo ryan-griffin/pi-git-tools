@@ -25,38 +25,41 @@ export function register(pi: ExtensionAPI) {
 			"Revert a commit by creating an inverse commit, or continue/abort an in-progress revert. " +
 			"Safely undoes changes on shared branches.",
 		promptSnippet: "Revert a commit",
-		parameters: Type.Object({
-			action: Type.Optional(
-				Type.Union(
-					[
-						Type.Literal("revert"),
-						Type.Literal("continue"),
-						Type.Literal("abort"),
-					],
-					{
-						description:
-							"Action: 'revert' (default), 'continue' (after conflicts), or 'abort'.",
-					},
+		parameters: Type.Object(
+			{
+				action: Type.Optional(
+					Type.Union(
+						[
+							Type.Literal("revert"),
+							Type.Literal("continue"),
+							Type.Literal("abort"),
+						],
+						{
+							description:
+								"Action: 'revert' (default), 'continue' (after conflicts), or 'abort'.",
+						},
+					),
 				),
-			),
-			commit: Type.Optional(
-				Type.String({
-					description: "Commit ref to revert (required for action=revert).",
-				}),
-			),
-			noCommit: Type.Optional(
-				Type.Boolean({
-					description:
-						"Apply the inverse change without creating a commit (--no-commit).",
-				}),
-			),
-			edit: Type.Optional(
-				Type.Boolean({
-					description:
-						"Edit the revert commit message (--edit). Not supported headlessly — will error if true.",
-				}),
-			),
-		}),
+				commit: Type.Optional(
+					Type.String({
+						description: "Commit ref to revert (required for action=revert).",
+					}),
+				),
+				noCommit: Type.Optional(
+					Type.Boolean({
+						description:
+							"Apply the inverse change without creating a commit (--no-commit).",
+					}),
+				),
+				edit: Type.Optional(
+					Type.Boolean({
+						description:
+							"Edit the revert commit message (--edit). Not supported headlessly — will error if true.",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);

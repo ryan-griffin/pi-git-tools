@@ -15,36 +15,39 @@ export function register(pi: ExtensionAPI) {
 			"Stage file contents to the index. Stages specific paths, or all changes with --all/--update. " +
 			"Use --intent-to-add (-N) to track new files without staging content.",
 		promptSnippet: "Stage files",
-		parameters: Type.Object({
-			paths: Type.Optional(
-				Type.Array(Type.String(), {
-					description: "Path(s) to stage (e.g. 'src/file.ts', 'src/').",
-				}),
-			),
-			all: Type.Optional(
-				Type.Boolean({
-					description:
-						"Stage all changes (--all, -A) — new, modified, and deleted files.",
-				}),
-			),
-			update: Type.Optional(
-				Type.Boolean({
-					description:
-						"Stage all changes to tracked files only (--update, -u).",
-				}),
-			),
-			intentToAdd: Type.Optional(
-				Type.Boolean({
-					description:
-						"Record intent to add (--intent-to-add, -N) — track new files without staging content.",
-				}),
-			),
-			force: Type.Optional(
-				Type.Boolean({
-					description: "Force add ignored files (--force, -f).",
-				}),
-			),
-		}),
+		parameters: Type.Object(
+			{
+				paths: Type.Optional(
+					Type.Array(Type.String(), {
+						description: "Path(s) to stage (e.g. 'src/file.ts', 'src/').",
+					}),
+				),
+				all: Type.Optional(
+					Type.Boolean({
+						description:
+							"Stage all changes (--all, -A) — new, modified, and deleted files.",
+					}),
+				),
+				update: Type.Optional(
+					Type.Boolean({
+						description:
+							"Stage all changes to tracked files only (--update, -u).",
+					}),
+				),
+				intentToAdd: Type.Optional(
+					Type.Boolean({
+						description:
+							"Record intent to add (--intent-to-add, -N) — track new files without staging content.",
+					}),
+				),
+				force: Type.Optional(
+					Type.Boolean({
+						description: "Force add ignored files (--force, -f).",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);

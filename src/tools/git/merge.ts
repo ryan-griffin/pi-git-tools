@@ -25,50 +25,53 @@ export function register(pi: ExtensionAPI) {
 			"Merge a branch into the current branch, or continue/abort an in-progress merge. " +
 			"Use --no-ff to force a merge commit, --squash to squash commits.",
 		promptSnippet: "Merge a branch",
-		parameters: Type.Object({
-			action: Type.Optional(
-				Type.Union(
-					[
-						Type.Literal("merge"),
-						Type.Literal("continue"),
-						Type.Literal("abort"),
-					],
-					{
-						description:
-							"Action: 'merge' (default), 'continue' (after resolving conflicts), or 'abort'.",
-					},
+		parameters: Type.Object(
+			{
+				action: Type.Optional(
+					Type.Union(
+						[
+							Type.Literal("merge"),
+							Type.Literal("continue"),
+							Type.Literal("abort"),
+						],
+						{
+							description:
+								"Action: 'merge' (default), 'continue' (after resolving conflicts), or 'abort'.",
+						},
+					),
 				),
-			),
-			branch: Type.Optional(
-				Type.String({
-					description:
-						"Branch name to merge into the current branch (required for action=merge).",
-				}),
-			),
-			noFF: Type.Optional(
-				Type.Boolean({
-					description:
-						"Create a merge commit even when fast-forward is possible (--no-ff). Cannot be used with squash.",
-				}),
-			),
-			squash: Type.Optional(
-				Type.Boolean({
-					description:
-						"Squash commits from the source branch into one (--squash). Only stages changes — you must run git_commit afterwards. Cannot be used with noFF.",
-				}),
-			),
-			message: Type.Optional(
-				Type.String({
-					description: "Merge message (for --no-ff merge commits).",
-				}),
-			),
-			ffOnly: Type.Optional(
-				Type.Boolean({
-					description:
-						"Only merge if fast-forward is possible (--ff-only). Refuses to merge if divergence exists.",
-				}),
-			),
-		}),
+				branch: Type.Optional(
+					Type.String({
+						description:
+							"Branch name to merge into the current branch (required for action=merge).",
+					}),
+				),
+				noFF: Type.Optional(
+					Type.Boolean({
+						description:
+							"Create a merge commit even when fast-forward is possible (--no-ff). Cannot be used with squash.",
+					}),
+				),
+				squash: Type.Optional(
+					Type.Boolean({
+						description:
+							"Squash commits from the source branch into one (--squash). Only stages changes — you must run git_commit afterwards. Cannot be used with noFF.",
+					}),
+				),
+				message: Type.Optional(
+					Type.String({
+						description: "Merge message (for --no-ff merge commits).",
+					}),
+				),
+				ffOnly: Type.Optional(
+					Type.Boolean({
+						description:
+							"Only merge if fast-forward is possible (--ff-only). Refuses to merge if divergence exists.",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);

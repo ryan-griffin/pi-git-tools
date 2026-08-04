@@ -19,38 +19,41 @@ export function register(pi: ExtensionAPI) {
 			"Create an empty git repository (or reinitialize an existing one). Supports bare repositories, a custom initial branch name, and object/ref formats. " +
 			"Unlike most git tools, this does not require being inside an existing repository.",
 		promptSnippet: "Initialize a git repository",
-		parameters: Type.Object({
-			directory: Type.Optional(
-				Type.String({
-					description:
-						"Directory to initialize the repository in. Defaults to the current working directory.",
-				}),
-			),
-			bare: Type.Optional(
-				Type.Boolean({
-					description:
-						"Create a bare repository (no working tree), typically used as a shared remote (--bare).",
-				}),
-			),
-			initialBranch: Type.Optional(
-				Type.String({
-					description:
-						"Name for the initial branch before the first commit (--initial-branch), e.g. 'main'. Requires git >= 2.28.",
-				}),
-			),
-			objectFormat: Type.Optional(
-				Type.Union([Type.Literal("sha1"), Type.Literal("sha256")], {
-					description:
-						"Hash algorithm for object storage (--object-format). Defaults to the git default (sha1).",
-				}),
-			),
-			refFormat: Type.Optional(
-				Type.Union([Type.Literal("files"), Type.Literal("reftable")], {
-					description:
-						"Reference storage format (--ref-format). 'reftable' requires git >= 2.45.",
-				}),
-			),
-		}),
+		parameters: Type.Object(
+			{
+				directory: Type.Optional(
+					Type.String({
+						description:
+							"Directory to initialize the repository in. Defaults to the current working directory.",
+					}),
+				),
+				bare: Type.Optional(
+					Type.Boolean({
+						description:
+							"Create a bare repository (no working tree), typically used as a shared remote (--bare).",
+					}),
+				),
+				initialBranch: Type.Optional(
+					Type.String({
+						description:
+							"Name for the initial branch before the first commit (--initial-branch), e.g. 'main'. Requires git >= 2.28.",
+					}),
+				),
+				objectFormat: Type.Optional(
+					Type.Union([Type.Literal("sha1"), Type.Literal("sha256")], {
+						description:
+							"Hash algorithm for object storage (--object-format). Defaults to the git default (sha1).",
+					}),
+				),
+				refFormat: Type.Optional(
+					Type.Union([Type.Literal("files"), Type.Literal("reftable")], {
+						description:
+							"Reference storage format (--ref-format). 'reftable' requires git >= 2.45.",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			if (params.initialBranch) {

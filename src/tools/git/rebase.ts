@@ -26,40 +26,43 @@ export function register(pi: ExtensionAPI) {
 			"Rebase the current branch onto another branch, or continue/abort/skip an in-progress rebase. " +
 			"Supports autosquash. Interactive rebase is not available headlessly.",
 		promptSnippet: "Rebase onto another branch",
-		parameters: Type.Object({
-			action: Type.Optional(
-				Type.Union(
-					[
-						Type.Literal("rebase"),
-						Type.Literal("continue"),
-						Type.Literal("abort"),
-						Type.Literal("skip"),
-					],
-					{
-						description:
-							"Action: 'rebase' (default), 'continue', 'abort', or 'skip' (during conflict).",
-					},
+		parameters: Type.Object(
+			{
+				action: Type.Optional(
+					Type.Union(
+						[
+							Type.Literal("rebase"),
+							Type.Literal("continue"),
+							Type.Literal("abort"),
+							Type.Literal("skip"),
+						],
+						{
+							description:
+								"Action: 'rebase' (default), 'continue', 'abort', or 'skip' (during conflict).",
+						},
+					),
 				),
-			),
-			onto: Type.Optional(
-				Type.String({
-					description:
-						"Branch or ref to rebase onto (e.g. 'main', 'HEAD~3'). Required for action=rebase.",
-				}),
-			),
-			interactive: Type.Optional(
-				Type.Boolean({
-					description:
-						"Use interactive rebase (-i). Not supported headlessly — will error if true.",
-				}),
-			),
-			autosquash: Type.Optional(
-				Type.Boolean({
-					description:
-						"Automatically squash fixup/squash commits (--autosquash).",
-				}),
-			),
-		}),
+				onto: Type.Optional(
+					Type.String({
+						description:
+							"Branch or ref to rebase onto (e.g. 'main', 'HEAD~3'). Required for action=rebase.",
+					}),
+				),
+				interactive: Type.Optional(
+					Type.Boolean({
+						description:
+							"Use interactive rebase (-i). Not supported headlessly — will error if true.",
+					}),
+				),
+				autosquash: Type.Optional(
+					Type.Boolean({
+						description:
+							"Automatically squash fixup/squash commits (--autosquash).",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);
