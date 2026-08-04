@@ -2,7 +2,7 @@
  * pi-git-tools — worktree integration tests.
  */
 import { execFileSync } from "node:child_process";
-import { rmSync } from "node:fs";
+import { existsSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { after, before, describe, it } from "node:test";
@@ -77,6 +77,49 @@ describe("worktree", () => {
 				/* may not exist */
 			}
 		}
+	});
+
+	it("git_worktree add passes paths through verbatim (no trim)", async () => {
+		// Trailing-space-only relative path: git creates the literal directory
+		// (leading-space paths are rejected by validation — git would misread
+		// them as relative and create garbage nested directories).
+		const worktreePath = `wt-space-${Date.now()} `;
+		try {
+			const result = await execTool(gitTools, "git_worktree", {
+				action: "add",
+				path: worktreePath,
+				detach: true,
+			});
+			assert.equal(
+				result.details.path,
+				worktreePath,
+				"path is reported verbatim, not trimmed",
+			);
+			assert.ok(
+				existsSync(resolve(repoPath, worktreePath)),
+				"worktree directory created with literal trailing space",
+			);
+		} finally {
+			try {
+				execFileSync("git", ["worktree", "remove", "--force", worktreePath], {
+					cwd: repoPath,
+				});
+			} catch {
+				/* may not exist */
+			}
+		}
+	});
+
+	it("git_worktree rejects leading-whitespace paths", async () => {
+		await assert.rejects(
+			() =>
+				execTool(gitTools, "git_worktree", {
+					action: "add",
+					path: " wt-space-bad",
+					detach: true,
+				}),
+			(err) => err.message.includes("may not start with whitespace"),
+		);
 	});
 
 	it("git_worktree list shows worktrees", async () => {

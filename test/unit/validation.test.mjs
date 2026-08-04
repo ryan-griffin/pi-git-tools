@@ -556,6 +556,20 @@ describe("validateDestinationPath", () => {
 		expectError(() => validateDestinationPath("-x"), "may not start with '-'");
 	});
 
+	it("rejects leading whitespace but preserves trailing whitespace", () => {
+		expectError(
+			() => validateDestinationPath(" /tmp/clone"),
+			"may not start with whitespace",
+		);
+		expectError(
+			() => validateDestinationPath("\u00a0relative/path"),
+			"may not start with whitespace",
+		);
+		// Trailing whitespace stays legal: it is passed through verbatim and
+		// may be intentional (a directory named 'foo ' is a valid POSIX path).
+		assert.equal(validateDestinationPath("relative/path "), "relative/path ");
+	});
+
 	it("rejects control characters", () => {
 		expectError(
 			() => validateDestinationPath("a\u0000b"),

@@ -153,6 +153,13 @@ export function validateDestinationPath(path: string, field = "path"): string {
 	if (path.startsWith("-")) {
 		throw new ValidationError(`${field}: may not start with '-'`);
 	}
+	// A leading space would be misread by git as a RELATIVE path (git checks
+	// only for a leading '/' when resolving), silently creating a garbage
+	// nested directory instead of erroring. Trailing whitespace stays legal:
+	// it is preserved verbatim and may be intentional (see bd6a023 rationale).
+	if (/^\s/.test(path)) {
+		throw new ValidationError(`${field}: may not start with whitespace`);
+	}
 	if (path.length > 4096) {
 		throw new ValidationError(`${field}: path too long`);
 	}
