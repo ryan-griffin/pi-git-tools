@@ -74,4 +74,28 @@ describe("branch", () => {
 			`branch ${branchName} was deleted`,
 		);
 	});
+
+	it("git_branch rejects action-inapplicable params", async () => {
+		await assert.rejects(
+			() =>
+				execTool(gitTools, "git_branch", {
+					action: "list",
+					name: "feature/test",
+				}),
+			(err) =>
+				err.message.includes(
+					"'name' is only valid for action(s): create, delete, rename, switch (got action='list')",
+				),
+		);
+		await assert.rejects(
+			() =>
+				execTool(gitTools, "git_branch", {
+					action: "delete",
+					name: "feature/test",
+					remote: true,
+				}),
+			(err) =>
+				err.message.includes("'remote' is only valid for action(s): list"),
+		);
+	});
 });

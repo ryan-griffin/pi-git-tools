@@ -89,4 +89,18 @@ describe("worktree", () => {
 		);
 		assert.ok(result.details.worktrees >= 1, "at least one worktree listed");
 	});
+
+	it("git_worktree rejects action-inapplicable params", async () => {
+		await assert.rejects(
+			() =>
+				execTool(gitTools, "git_worktree", {
+					action: "prune",
+					path: "some/path",
+				}),
+			(err) =>
+				err.message.includes(
+					"'path' is only valid for action(s): add, remove, lock, unlock",
+				),
+		);
+	});
 });

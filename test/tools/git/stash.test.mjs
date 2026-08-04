@@ -42,7 +42,8 @@ describe("stash", () => {
 					action: "pop",
 					keepIndex: true,
 				}),
-			(err) => err.message.includes("only valid for stash push"),
+			(err) =>
+				err.message.includes("'keepIndex' is only valid for action(s): push"),
 		);
 		await assert.rejects(
 			() =>
@@ -50,7 +51,10 @@ describe("stash", () => {
 					action: "pop",
 					includeUntracked: true,
 				}),
-			(err) => err.message.includes("only valid for stash push"),
+			(err) =>
+				err.message.includes(
+					"'includeUntracked' is only valid for action(s): push",
+				),
 		);
 	});
 
@@ -61,7 +65,8 @@ describe("stash", () => {
 					action: "apply",
 					keepIndex: true,
 				}),
-			(err) => err.message.includes("only valid for stash push"),
+			(err) =>
+				err.message.includes("'keepIndex' is only valid for action(s): push"),
 		);
 	});
 
@@ -72,7 +77,55 @@ describe("stash", () => {
 					action: "pop",
 					paths: ["README.md"],
 				}),
-			(err) => err.message.includes("only valid for stash push"),
+			(err) =>
+				err.message.includes("'paths' is only valid for action(s): push"),
+		);
+	});
+
+	it("git_stash rejects push-only params on drop/show/list", async () => {
+		// Previously silently ignored; now rejected like pop/apply.
+		await assert.rejects(
+			() =>
+				execTool(gitTools, "git_stash", {
+					action: "drop",
+					includeUntracked: true,
+				}),
+			(err) =>
+				err.message.includes(
+					"'includeUntracked' is only valid for action(s): push",
+				),
+		);
+		await assert.rejects(
+			() =>
+				execTool(gitTools, "git_stash", {
+					action: "show",
+					message: "nope",
+				}),
+			(err) =>
+				err.message.includes("'message' is only valid for action(s): push"),
+		);
+		await assert.rejects(
+			() =>
+				execTool(gitTools, "git_stash", {
+					action: "list",
+					index: 2,
+				}),
+			(err) =>
+				err.message.includes(
+					"'index' is only valid for action(s): pop, apply, drop, show",
+				),
+		);
+	});
+
+	it("git_stash rejects show-only patch on other actions", async () => {
+		await assert.rejects(
+			() =>
+				execTool(gitTools, "git_stash", {
+					action: "pop",
+					patch: true,
+				}),
+			(err) =>
+				err.message.includes("'patch' is only valid for action(s): show"),
 		);
 	});
 

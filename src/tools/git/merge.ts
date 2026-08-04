@@ -5,7 +5,17 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import { registerTool } from "../../truncate.js";
 import { findRepoRoot, resolveCwd, run } from "../../utils.js";
-import { validateBranchName } from "../../validation.js";
+import {
+	assertParamsValidForAction,
+	validateBranchName,
+} from "../../validation.js";
+
+/** Params valid per action; everything else present is rejected up front. */
+const ACTION_PARAMS: Record<string, readonly string[]> = {
+	merge: ["branch", "noFF", "squash", "message", "ffOnly"],
+	continue: [],
+	abort: [],
+};
 
 export function register(pi: ExtensionAPI) {
 	registerTool(pi, {
@@ -63,6 +73,7 @@ export function register(pi: ExtensionAPI) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);
 			const action = params.action || "merge";
+			assertParamsValidForAction("git_merge", action, params, ACTION_PARAMS);
 
 			if (action === "abort") {
 				const output = await run(

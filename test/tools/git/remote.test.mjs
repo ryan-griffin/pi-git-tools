@@ -66,4 +66,16 @@ describe("remote", () => {
 		});
 		assert.ok(removeResult.content[0].text.includes(remoteName));
 	});
+
+	it("git_remote rejects action-inapplicable params", async () => {
+		await assert.rejects(
+			() =>
+				execTool(gitTools, "git_remote", {
+					action: "list",
+					url: "https://example.com/x.git",
+				}),
+			(err) =>
+				err.message.includes("'url' is only valid for action(s): add, set-url"),
+		);
+	});
 });

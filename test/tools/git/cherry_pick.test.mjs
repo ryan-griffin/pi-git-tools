@@ -87,4 +87,16 @@ describe("cherry_pick", () => {
 			}
 		}
 	});
+
+	it("git_cherry_pick rejects params on skip", async () => {
+		await assert.rejects(
+			() =>
+				execTool(gitTools, "git_cherry_pick", {
+					action: "skip",
+					commits: ["abc123"],
+				}),
+			(err) =>
+				err.message.includes("'commits' is only valid for action(s): pick"),
+		);
+	});
 });

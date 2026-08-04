@@ -67,4 +67,16 @@ describe("revert", () => {
 		// Abort the revert since noCommit was used
 		execFileSync("git", ["revert", "--abort"], { cwd: repoPath });
 	});
+
+	it("git_revert rejects params on abort", async () => {
+		await assert.rejects(
+			() =>
+				execTool(gitTools, "git_revert", {
+					action: "abort",
+					noCommit: true,
+				}),
+			(err) =>
+				err.message.includes("'noCommit' is only valid for action(s): revert"),
+		);
+	});
 });

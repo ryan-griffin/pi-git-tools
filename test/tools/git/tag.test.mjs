@@ -84,4 +84,28 @@ describe("tag", () => {
 			(err) => err.message.includes("message"),
 		);
 	});
+
+	it("git_tag rejects action-inapplicable params", async () => {
+		await assert.rejects(
+			() =>
+				execTool(gitTools, "git_tag", {
+					action: "list",
+					name: "v1",
+				}),
+			(err) =>
+				err.message.includes(
+					"'name' is only valid for action(s): create, delete, verify (got action='list')",
+				),
+		);
+		await assert.rejects(
+			() =>
+				execTool(gitTools, "git_tag", {
+					action: "create",
+					name: "v1",
+					listPattern: "v*",
+				}),
+			(err) =>
+				err.message.includes("'listPattern' is only valid for action(s): list"),
+		);
+	});
 });

@@ -5,13 +5,56 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import { registerTool } from "../../truncate.js";
 import { resolveCwd, run } from "../../utils.js";
-import { validateBranchName, validateGhHeadRef } from "../../validation.js";
+import {
+	assertParamsValidForAction,
+	validateBranchName,
+	validateGhHeadRef,
+} from "../../validation.js";
 import {
 	findRepoRootBestEffort,
 	formatGhAuthor,
 	requireGh,
 	resolveRepo,
 } from "../gh-helpers.js";
+
+/** Params valid per action; everything else present is rejected up front. */
+const ACTION_PARAMS: Record<string, readonly string[]> = {
+	list: ["repo", "state", "limit"],
+	view: ["repo", "number"],
+	create: [
+		"repo",
+		"title",
+		"body",
+		"fill",
+		"head",
+		"base",
+		"draft",
+		"reviewer",
+		"label",
+	],
+	edit: [
+		"repo",
+		"number",
+		"title",
+		"body",
+		"base",
+		"addLabel",
+		"removeLabel",
+		"addAssignee",
+		"removeAssignee",
+		"addReviewer",
+		"removeReviewer",
+	],
+	checkout: ["repo", "number"],
+	merge: ["repo", "number", "mergeMethod", "deleteBranch"],
+	close: ["repo", "number", "body"],
+	reopen: ["repo", "number"],
+	comment: ["repo", "number", "body"],
+	review: ["repo", "number", "reviewEvent", "body"],
+	diff: ["repo", "number", "nameOnly"],
+	checks: ["repo", "number"],
+	ready: ["repo", "number", "undo"],
+};
 
 export function register(pi: ExtensionAPI) {
 	registerTool(pi, {
@@ -191,16 +234,19 @@ export function register(pi: ExtensionAPI) {
 		}),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
-			const root = await findRepoRootBestEffort(cwd, _signal);
-			await requireGh(root, _signal);
-			const repo = await resolveRepo(params.repo, root, _signal);
+			// Pure validation first: no gh roundtrip for a request that is
+			// invalid on its face (action-inapplicable params, bad number).
 			const action = params.action || "list";
+			assertParamsValidForAction("gh_pr", action, params, ACTION_PARAMS);
 			if (
 				params.number !== undefined &&
 				(!Number.isSafeInteger(params.number) || params.number < 1)
 			) {
 				throw new Error("'number' must be a positive integer.");
 			}
+			const root = await findRepoRootBestEffort(cwd, _signal);
+			await requireGh(root, _signal);
+			const repo = await resolveRepo(params.repo, root, _signal);
 
 			switch (action) {
 				case "list": {

@@ -87,4 +87,18 @@ describe("rebase", () => {
 			}
 		}
 	});
+
+	it("git_rebase rejects params on continue", async () => {
+		await assert.rejects(
+			() =>
+				execTool(gitTools, "git_rebase", {
+					action: "continue",
+					autosquash: true,
+				}),
+			(err) =>
+				err.message.includes(
+					"'autosquash' is only valid for action(s): rebase",
+				),
+		);
+	});
 });
