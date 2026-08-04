@@ -20,7 +20,8 @@ export function register(pi: ExtensionAPI) {
 			staged: Type.Optional(
 				Type.Boolean({
 					description:
-						"Show staged changes (--cached) instead of unstaged changes.",
+						"Show staged changes (--cached) instead of unstaged changes. " +
+						"Can be combined with 'ref' to compare the index against a commit.",
 				}),
 			),
 			ref: Type.Optional(
@@ -82,11 +83,8 @@ export function register(pi: ExtensionAPI) {
 					"'ref2' requires 'ref' (use ref='main' ref2='feature' for a two-commit diff).",
 				);
 			}
-			if (params.staged && ref) {
-				throw new Error(
-					"'staged' cannot be combined with 'ref' (git rejects --cached with commits).",
-				);
-			}
+			// `staged` may be combined with `ref`: `git diff --cached <commit>`
+			// compares the index against that commit — a valid, useful query.
 			if (ref) validateCommitish(ref, "diff ref");
 			if (ref2) validateCommitish(ref2, "diff ref2");
 			// --no-color: never leak ANSI escapes into tool output, even with

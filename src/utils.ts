@@ -80,6 +80,15 @@ const SAFE_ENV: Record<string, string> = {
 	GH_PROMPT_DISABLED: "1",
 	// Prefer non-interactive gh behavior in agent contexts
 	GH_NO_UPDATE_NOTIFIER: "1",
+	// Never emit ANSI colors, regardless of the user's color.ui setting
+	// (color.ui=always leaks escape sequences into tool output). The
+	// GIT_CONFIG_COUNT pair is read as highest-precedence config, like -c.
+	// Requires git >= 2.31; older git ignores the variables (the --no-color
+	// flags on diff/log/show/reflog remain as a secondary guard). gh ignores
+	// these variables entirely.
+	GIT_CONFIG_COUNT: "1",
+	GIT_CONFIG_KEY_0: "color.ui",
+	GIT_CONFIG_VALUE_0: "never",
 };
 
 /**

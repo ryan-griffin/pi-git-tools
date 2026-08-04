@@ -50,4 +50,11 @@ describe("reset", () => {
 			},
 		);
 	});
+
+	it("git_reset rejects an unknown mode", async () => {
+		await assert.rejects(
+			() => execTool(gitTools, "git_reset", { mode: "nuclear" }),
+			(err) => err.message.includes("Invalid mode"),
+		);
+	});
 });
