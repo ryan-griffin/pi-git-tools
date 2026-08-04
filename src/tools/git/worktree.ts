@@ -29,48 +29,52 @@ export function register(pi: ExtensionAPI) {
 		description:
 			"Manage multiple working trees attached to the same repository. Supports add, list, remove, prune, lock, and unlock operations.",
 		promptSnippet: "Manage working trees",
-		parameters: Type.Object({
-			action: Type.Optional(
-				Type.Union(
-					[
-						Type.Literal("list"),
-						Type.Literal("add"),
-						Type.Literal("remove"),
-						Type.Literal("prune"),
-						Type.Literal("lock"),
-						Type.Literal("unlock"),
-					],
-					{
-						description:
-							"Action: 'list' (default), 'add', 'remove', 'prune', 'lock', or 'unlock'.",
-					},
+		parameters: Type.Object(
+			{
+				action: Type.Optional(
+					Type.Union(
+						[
+							Type.Literal("list"),
+							Type.Literal("add"),
+							Type.Literal("remove"),
+							Type.Literal("prune"),
+							Type.Literal("lock"),
+							Type.Literal("unlock"),
+						],
+						{
+							description:
+								"Action: 'list' (default), 'add', 'remove', 'prune', 'lock', or 'unlock'.",
+						},
+					),
 				),
-			),
-			path: Type.Optional(
-				Type.String({
-					description: "Path for the new worktree (required for 'add').",
-				}),
-			),
-			branch: Type.Optional(
-				Type.String({
-					description:
-						"Branch name for the new worktree (for 'add'). Creates a new branch with -b. " +
-						"With detach: true, treated as an existing ref for detached HEAD instead. " +
-						"Defaults to a name derived from the path.",
-				}),
-			),
-			detach: Type.Optional(
-				Type.Boolean({
-					description:
-						"Check out a detached HEAD at the given ref instead of creating a new branch (for 'add').",
-				}),
-			),
-			force: Type.Optional(
-				Type.Boolean({
-					description: "Force operation (for 'remove' or 'add' with --force).",
-				}),
-			),
-		}),
+				path: Type.Optional(
+					Type.String({
+						description: "Path for the new worktree (required for 'add').",
+					}),
+				),
+				branch: Type.Optional(
+					Type.String({
+						description:
+							"Branch name for the new worktree (for 'add'). Creates a new branch with -b. " +
+							"With detach: true, treated as an existing ref for detached HEAD instead. " +
+							"Defaults to a name derived from the path.",
+					}),
+				),
+				detach: Type.Optional(
+					Type.Boolean({
+						description:
+							"Check out a detached HEAD at the given ref instead of creating a new branch (for 'add').",
+					}),
+				),
+				force: Type.Optional(
+					Type.Boolean({
+						description:
+							"Force operation (for 'remove' or 'add' with --force).",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);

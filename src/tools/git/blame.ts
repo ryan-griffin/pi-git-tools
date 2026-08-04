@@ -14,43 +14,46 @@ export function register(pi: ExtensionAPI) {
 		description:
 			"Show line-by-line authorship for a file. Optionally limit to a line range or blame at a specific revision.",
 		promptSnippet: "Blame a file",
-		parameters: Type.Object({
-			path: Type.String({
-				description: "File path to blame (relative to repo root).",
-			}),
-			ref: Type.Optional(
-				Type.String({
-					description: "Revision to blame at (default: working tree / HEAD).",
+		parameters: Type.Object(
+			{
+				path: Type.String({
+					description: "File path to blame (relative to repo root).",
 				}),
-			),
-			lineStart: Type.Optional(
-				Type.Integer({
-					description: "Start line (1-based) for a ranged blame.",
-					minimum: 1,
-				}),
-			),
-			lineEnd: Type.Optional(
-				Type.Integer({
-					description: "End line (1-based, inclusive) for a ranged blame.",
-					minimum: 1,
-				}),
-			),
-			ignoreWhitespace: Type.Optional(
-				Type.Boolean({
-					description: "Ignore whitespace changes (-w).",
-				}),
-			),
-			detectMoves: Type.Optional(
-				Type.Boolean({
-					description: "Detect moved lines within or across files (-M).",
-				}),
-			),
-			detectCopies: Type.Optional(
-				Type.Boolean({
-					description: "Detect lines moved/copied from other files (-C).",
-				}),
-			),
-		}),
+				ref: Type.Optional(
+					Type.String({
+						description: "Revision to blame at (default: working tree / HEAD).",
+					}),
+				),
+				lineStart: Type.Optional(
+					Type.Integer({
+						description: "Start line (1-based) for a ranged blame.",
+						minimum: 1,
+					}),
+				),
+				lineEnd: Type.Optional(
+					Type.Integer({
+						description: "End line (1-based, inclusive) for a ranged blame.",
+						minimum: 1,
+					}),
+				),
+				ignoreWhitespace: Type.Optional(
+					Type.Boolean({
+						description: "Ignore whitespace changes (-w).",
+					}),
+				),
+				detectMoves: Type.Optional(
+					Type.Boolean({
+						description: "Detect moved lines within or across files (-M).",
+					}),
+				),
+				detectCopies: Type.Optional(
+					Type.Boolean({
+						description: "Detect lines moved/copied from other files (-C).",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);

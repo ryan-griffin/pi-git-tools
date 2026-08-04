@@ -14,50 +14,53 @@ export function register(pi: ExtensionAPI) {
 		description:
 			"Fetch from and integrate with a remote repository. Defaults to the current branch's upstream. Supports rebase mode.",
 		promptSnippet: "Pull latest changes",
-		parameters: Type.Object({
-			remote: Type.Optional(
-				Type.String({
-					description:
-						"Remote name (default: current branch's upstream; origin when 'branch' is given).",
-					minLength: 1,
-				}),
-			),
-			branch: Type.Optional(
-				Type.String({
-					description:
-						"Branch to pull from (default: current branch's upstream).",
-					minLength: 1,
-				}),
-			),
-			rebase: Type.Optional(
-				Type.Boolean({
-					description: "Use rebase instead of merge.",
-				}),
-			),
-			ffOnly: Type.Optional(
-				Type.Boolean({
-					description: "Only allow fast-forward merges.",
-				}),
-			),
-			autostash: Type.Optional(
-				Type.Boolean({
-					description:
-						"Automatically stash and pop local changes before/after pull (--autostash).",
-				}),
-			),
-			noFF: Type.Optional(
-				Type.Boolean({
-					description:
-						"Create a merge commit even if fast-forward is possible (--no-ff).",
-				}),
-			),
-			squash: Type.Optional(
-				Type.Boolean({
-					description:
-						"Squash pulled commits into a single commit (--squash). Only stages changes — you must commit afterwards.",
-				}),
-			),
-		}),
+		parameters: Type.Object(
+			{
+				remote: Type.Optional(
+					Type.String({
+						description:
+							"Remote name (default: current branch's upstream; origin when 'branch' is given).",
+						minLength: 1,
+					}),
+				),
+				branch: Type.Optional(
+					Type.String({
+						description:
+							"Branch to pull from (default: current branch's upstream).",
+						minLength: 1,
+					}),
+				),
+				rebase: Type.Optional(
+					Type.Boolean({
+						description: "Use rebase instead of merge.",
+					}),
+				),
+				ffOnly: Type.Optional(
+					Type.Boolean({
+						description: "Only allow fast-forward merges.",
+					}),
+				),
+				autostash: Type.Optional(
+					Type.Boolean({
+						description:
+							"Automatically stash and pop local changes before/after pull (--autostash).",
+					}),
+				),
+				noFF: Type.Optional(
+					Type.Boolean({
+						description:
+							"Create a merge commit even if fast-forward is possible (--no-ff).",
+					}),
+				),
+				squash: Type.Optional(
+					Type.Boolean({
+						description:
+							"Squash pulled commits into a single commit (--squash). Only stages changes — you must commit afterwards.",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);

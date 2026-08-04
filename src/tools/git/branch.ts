@@ -27,64 +27,67 @@ export function register(pi: ExtensionAPI) {
 		description:
 			"List, create, rename, or delete branches. Lists all local branches by default.",
 		promptSnippet: "Manage branches",
-		parameters: Type.Object({
-			action: Type.Optional(
-				Type.Union(
-					[
-						Type.Literal("list"),
-						Type.Literal("create"),
-						Type.Literal("delete"),
-						Type.Literal("rename"),
-						Type.Literal("switch"),
-					],
-					{
-						description:
-							"Action: 'list' (default), 'create', 'delete', 'rename', or 'switch'.",
-					},
+		parameters: Type.Object(
+			{
+				action: Type.Optional(
+					Type.Union(
+						[
+							Type.Literal("list"),
+							Type.Literal("create"),
+							Type.Literal("delete"),
+							Type.Literal("rename"),
+							Type.Literal("switch"),
+						],
+						{
+							description:
+								"Action: 'list' (default), 'create', 'delete', 'rename', or 'switch'.",
+						},
+					),
 				),
-			),
-			name: Type.Optional(
-				Type.String({
-					description:
-						"Branch name (required for create/delete/switch; old name for rename).",
-				}),
-			),
-			newName: Type.Optional(
-				Type.String({
-					description:
-						"New name for 'rename' action. When omitted, the CURRENT branch is renamed to 'name'.",
-				}),
-			),
-			remote: Type.Optional(
-				Type.Boolean({
-					description: "Include remote branches when listing.",
-				}),
-			),
-			force: Type.Optional(
-				Type.Boolean({
-					description:
-						"Force delete (-D), force-create, or force-switch (discards local changes) — use with caution.",
-				}),
-			),
-			startPoint: Type.Optional(
-				Type.String({
-					description:
-						"Start point (commit-ish) for 'create' (e.g. 'main', 'HEAD~3', 'origin/main').",
-				}),
-			),
-			checkout: Type.Optional(
-				Type.Boolean({
-					description:
-						"After 'create', switch to the new branch (git switch -c). Default: false.",
-				}),
-			),
-			track: Type.Optional(
-				Type.Boolean({
-					description:
-						"For 'switch': set up tracking when switching to a remote-tracking branch (e.g. origin/foo).",
-				}),
-			),
-		}),
+				name: Type.Optional(
+					Type.String({
+						description:
+							"Branch name (required for create/delete/switch; old name for rename).",
+					}),
+				),
+				newName: Type.Optional(
+					Type.String({
+						description:
+							"New name for 'rename' action. When omitted, the CURRENT branch is renamed to 'name'.",
+					}),
+				),
+				remote: Type.Optional(
+					Type.Boolean({
+						description: "Include remote branches when listing.",
+					}),
+				),
+				force: Type.Optional(
+					Type.Boolean({
+						description:
+							"Force delete (-D), force-create, or force-switch (discards local changes) — use with caution.",
+					}),
+				),
+				startPoint: Type.Optional(
+					Type.String({
+						description:
+							"Start point (commit-ish) for 'create' (e.g. 'main', 'HEAD~3', 'origin/main').",
+					}),
+				),
+				checkout: Type.Optional(
+					Type.Boolean({
+						description:
+							"After 'create', switch to the new branch (git switch -c). Default: false.",
+					}),
+				),
+				track: Type.Optional(
+					Type.Boolean({
+						description:
+							"For 'switch': set up tracking when switching to a remote-tracking branch (e.g. origin/foo).",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);

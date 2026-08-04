@@ -20,34 +20,37 @@ export function register(pi: ExtensionAPI) {
 		description:
 			"Apply a unified diff patch to the working tree (e.g. output from git_diff). Supports --3way, --reverse, --check (dry-run), and --cached (index only).",
 		promptSnippet: "Apply a patch",
-		parameters: Type.Object({
-			patch: Type.String({
-				description: "The unified diff text to apply (required).",
-			}),
-			threeway: Type.Optional(
-				Type.Boolean({
-					description:
-						"Fall back to a 3-way merge when the patch context is stale (--3way).",
+		parameters: Type.Object(
+			{
+				patch: Type.String({
+					description: "The unified diff text to apply (required).",
 				}),
-			),
-			reverse: Type.Optional(
-				Type.Boolean({
-					description: "Apply the patch in reverse (--reverse).",
-				}),
-			),
-			check: Type.Optional(
-				Type.Boolean({
-					description:
-						"Dry-run: verify the patch applies without changing anything (--check).",
-				}),
-			),
-			cached: Type.Optional(
-				Type.Boolean({
-					description:
-						"Apply the patch to the index only, leaving the working tree untouched (--cached).",
-				}),
-			),
-		}),
+				threeway: Type.Optional(
+					Type.Boolean({
+						description:
+							"Fall back to a 3-way merge when the patch context is stale (--3way).",
+					}),
+				),
+				reverse: Type.Optional(
+					Type.Boolean({
+						description: "Apply the patch in reverse (--reverse).",
+					}),
+				),
+				check: Type.Optional(
+					Type.Boolean({
+						description:
+							"Dry-run: verify the patch applies without changing anything (--check).",
+					}),
+				),
+				cached: Type.Optional(
+					Type.Boolean({
+						description:
+							"Apply the patch to the index only, leaving the working tree untouched (--cached).",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);

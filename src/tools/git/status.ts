@@ -13,7 +13,7 @@ export function register(pi: ExtensionAPI) {
 		description:
 			"Show the working tree status — staged, unstaged, and untracked changes. Run this first before other git operations to understand the current state of the repository.",
 		promptSnippet: "Check working tree status",
-		parameters: Type.Object({}),
+		parameters: Type.Object({}, { additionalProperties: false }),
 		async execute(_callId, _params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);

@@ -19,32 +19,35 @@ export function register(pi: ExtensionAPI) {
 		description:
 			"Show the reflog: where HEAD (or another ref) has pointed, including resets, rebases, and checkouts. Useful for recovering 'lost' commits.",
 		promptSnippet: "Show reflog (recover lost commits)",
-		parameters: Type.Object({
-			limit: Type.Optional(
-				Type.Integer({
-					description: "Max reflog entries (default: 20, max: 200).",
-					minimum: 1,
-					maximum: 200,
-				}),
-			),
-			ref: Type.Optional(
-				Type.String({
-					description:
-						"Ref whose reflog to show (default: HEAD, e.g. 'main', 'HEAD@{2}').",
-				}),
-			),
-			all: Type.Optional(
-				Type.Boolean({
-					description: "Show reflogs of all refs (--all).",
-				}),
-			),
-			format: Type.Optional(
-				Type.String({
-					description:
-						"Optional --format for each entry (git log placeholders, e.g. '%h %gd %gs'). Default: git's own reflog format.",
-				}),
-			),
-		}),
+		parameters: Type.Object(
+			{
+				limit: Type.Optional(
+					Type.Integer({
+						description: "Max reflog entries (default: 20, max: 200).",
+						minimum: 1,
+						maximum: 200,
+					}),
+				),
+				ref: Type.Optional(
+					Type.String({
+						description:
+							"Ref whose reflog to show (default: HEAD, e.g. 'main', 'HEAD@{2}').",
+					}),
+				),
+				all: Type.Optional(
+					Type.Boolean({
+						description: "Show reflogs of all refs (--all).",
+					}),
+				),
+				format: Type.Optional(
+					Type.String({
+						description:
+							"Optional --format for each entry (git log placeholders, e.g. '%h %gd %gs'). Default: git's own reflog format.",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);

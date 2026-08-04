@@ -133,76 +133,80 @@ export function register(pi: ExtensionAPI) {
 		description:
 			"Search GitHub for repositories, issues, pull requests, code, or users via the gh CLI search command.",
 		promptSnippet: "Search GitHub",
-		parameters: Type.Object({
-			type: Type.Optional(
-				Type.Union(
-					[
-						Type.Literal("repos"),
-						Type.Literal("issues"),
-						Type.Literal("prs"),
-						Type.Literal("code"),
-						Type.Literal("commits"),
-					],
-					{
-						description:
-							"Search type: 'repos' (default), 'issues', 'prs', 'code', or 'commits'.",
-					},
+		parameters: Type.Object(
+			{
+				type: Type.Optional(
+					Type.Union(
+						[
+							Type.Literal("repos"),
+							Type.Literal("issues"),
+							Type.Literal("prs"),
+							Type.Literal("code"),
+							Type.Literal("commits"),
+						],
+						{
+							description:
+								"Search type: 'repos' (default), 'issues', 'prs', 'code', or 'commits'.",
+						},
+					),
 				),
-			),
-			query: Type.String({
-				description: "Search query string (GitHub search syntax supported).",
-			}),
-			limit: Type.Optional(
-				Type.Integer({
-					description: "Max results (default: 10, max: 50).",
-					minimum: 1,
-					maximum: 50,
+				query: Type.String({
+					description: "Search query string (GitHub search syntax supported).",
 				}),
-			),
-			owner: Type.Optional(
-				Type.String({
-					description:
-						"Limit search to a specific owner/org (e.g. 'owner:vercel').",
-				}),
-			),
-			language: Type.Optional(
-				Type.String({
-					description: "Filter by language for repos/code (e.g. 'TypeScript').",
-				}),
-			),
-			repo: Type.Optional(
-				Type.String({
-					description:
-						"Filter by repo for issues/prs/code (e.g. 'owner/repo').",
-				}),
-			),
-			sort: Type.Optional(
-				Type.Union(
-					[
-						Type.Literal("stars"),
-						Type.Literal("forks"),
-						Type.Literal("updated"),
-						Type.Literal("best-match"),
-						Type.Literal("created"),
-						Type.Literal("author-date"),
-						Type.Literal("committer-date"),
-					],
-					{
-						description:
-							"Sort order: 'best-match' (default), or a type-specific sort — " +
-							"'stars'/'forks'/'updated' for repos, 'created'/'updated' for " +
-							"issues and PRs, 'author-date'/'committer-date' for commits. " +
-							"A sort unsupported for the chosen type is rejected; code search " +
-							"cannot be sorted.",
-					},
+				limit: Type.Optional(
+					Type.Integer({
+						description: "Max results (default: 10, max: 50).",
+						minimum: 1,
+						maximum: 50,
+					}),
 				),
-			),
-			order: Type.Optional(
-				Type.Union([Type.Literal("asc"), Type.Literal("desc")], {
-					description: "Sort direction: 'desc' (default) or 'asc'.",
-				}),
-			),
-		}),
+				owner: Type.Optional(
+					Type.String({
+						description:
+							"Limit search to a specific owner/org (e.g. 'owner:vercel').",
+					}),
+				),
+				language: Type.Optional(
+					Type.String({
+						description:
+							"Filter by language for repos/code (e.g. 'TypeScript').",
+					}),
+				),
+				repo: Type.Optional(
+					Type.String({
+						description:
+							"Filter by repo for issues/prs/code (e.g. 'owner/repo').",
+					}),
+				),
+				sort: Type.Optional(
+					Type.Union(
+						[
+							Type.Literal("stars"),
+							Type.Literal("forks"),
+							Type.Literal("updated"),
+							Type.Literal("best-match"),
+							Type.Literal("created"),
+							Type.Literal("author-date"),
+							Type.Literal("committer-date"),
+						],
+						{
+							description:
+								"Sort order: 'best-match' (default), or a type-specific sort — " +
+								"'stars'/'forks'/'updated' for repos, 'created'/'updated' for " +
+								"issues and PRs, 'author-date'/'committer-date' for commits. " +
+								"A sort unsupported for the chosen type is rejected; code search " +
+								"cannot be sorted.",
+						},
+					),
+				),
+				order: Type.Optional(
+					Type.Union([Type.Literal("asc"), Type.Literal("desc")], {
+						description: "Sort direction: 'desc' (default) or 'asc'.",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRootBestEffort(cwd, _signal);

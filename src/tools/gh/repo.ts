@@ -18,28 +18,31 @@ export function register(pi: ExtensionAPI) {
 		description:
 			"View repository information, list branches, or open the repo in the browser via the gh CLI.",
 		promptSnippet: "Get GitHub repo info",
-		parameters: Type.Object({
-			action: Type.Optional(
-				Type.Union(
-					[
-						Type.Literal("view"),
-						Type.Literal("list-branches"),
-						Type.Literal("list-languages"),
-						Type.Literal("open"),
-					],
-					{
-						description:
-							"Action: 'view' (default), 'list-branches', 'list-languages', or 'open'.",
-					},
+		parameters: Type.Object(
+			{
+				action: Type.Optional(
+					Type.Union(
+						[
+							Type.Literal("view"),
+							Type.Literal("list-branches"),
+							Type.Literal("list-languages"),
+							Type.Literal("open"),
+						],
+						{
+							description:
+								"Action: 'view' (default), 'list-branches', 'list-languages', or 'open'.",
+						},
+					),
 				),
-			),
-			repo: Type.Optional(
-				Type.String({
-					description:
-						"Repository in 'owner/repo' format. Defaults to the current git remote.",
-				}),
-			),
-		}),
+				repo: Type.Optional(
+					Type.String({
+						description:
+							"Repository in 'owner/repo' format. Defaults to the current git remote.",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRootBestEffort(cwd, _signal);

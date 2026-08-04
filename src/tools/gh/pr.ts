@@ -63,175 +63,178 @@ export function register(pi: ExtensionAPI) {
 		description:
 			"List, view, create, edit, checkout, merge, close, reopen, comment, review, diff, checks, or mark ready GitHub pull requests via the gh CLI.",
 		promptSnippet: "Manage GitHub pull requests",
-		parameters: Type.Object({
-			action: Type.Optional(
-				Type.Union(
-					[
-						Type.Literal("list"),
-						Type.Literal("view"),
-						Type.Literal("create"),
-						Type.Literal("edit"),
-						Type.Literal("checkout"),
-						Type.Literal("merge"),
-						Type.Literal("close"),
-						Type.Literal("reopen"),
-						Type.Literal("comment"),
-						Type.Literal("review"),
-						Type.Literal("diff"),
-						Type.Literal("checks"),
-						Type.Literal("ready"),
-					],
-					{
-						description:
-							"Action: 'list' (default), 'view', 'create', 'edit', 'checkout', 'merge', 'close', 'reopen', 'comment', 'review', 'diff', 'checks', or 'ready'.",
-					},
+		parameters: Type.Object(
+			{
+				action: Type.Optional(
+					Type.Union(
+						[
+							Type.Literal("list"),
+							Type.Literal("view"),
+							Type.Literal("create"),
+							Type.Literal("edit"),
+							Type.Literal("checkout"),
+							Type.Literal("merge"),
+							Type.Literal("close"),
+							Type.Literal("reopen"),
+							Type.Literal("comment"),
+							Type.Literal("review"),
+							Type.Literal("diff"),
+							Type.Literal("checks"),
+							Type.Literal("ready"),
+						],
+						{
+							description:
+								"Action: 'list' (default), 'view', 'create', 'edit', 'checkout', 'merge', 'close', 'reopen', 'comment', 'review', 'diff', 'checks', or 'ready'.",
+						},
+					),
 				),
-			),
-			repo: Type.Optional(
-				Type.String({
-					description:
-						"Repository in 'owner/repo' format. Defaults to the current git remote.",
-				}),
-			),
-			number: Type.Optional(
-				Type.Integer({
-					description:
-						"PR number (required for view/edit/checkout/merge/close/reopen/comment/review/diff/checks/ready).",
-					minimum: 1,
-				}),
-			),
-			state: Type.Optional(
-				Type.Union(
-					[
-						Type.Literal("open"),
-						Type.Literal("closed"),
-						Type.Literal("merged"),
-						Type.Literal("all"),
-					],
-					{
+				repo: Type.Optional(
+					Type.String({
 						description:
-							"Filter by state for 'list': 'open' (default), 'closed', 'merged', or 'all'.",
-					},
+							"Repository in 'owner/repo' format. Defaults to the current git remote.",
+					}),
 				),
-			),
-			limit: Type.Optional(
-				Type.Integer({
-					description: "Max PRs to list (default: 20, max: 100).",
-					minimum: 1,
-					maximum: 100,
-				}),
-			),
-			title: Type.Optional(
-				Type.String({
-					description:
-						"PR title (required for 'create' unless 'fill' is set; optional for 'edit').",
-				}),
-			),
-			body: Type.Optional(
-				Type.String({
-					description:
-						"PR body/description (for 'create'/'edit'/'comment'/'review'; close comment for 'close'). Defaults to empty string for create.",
-				}),
-			),
-			fill: Type.Optional(
-				Type.Boolean({
-					description:
-						"For 'create': derive title/body from the commits (--fill). Cannot be combined with 'title' or 'body'.",
-				}),
-			),
-			head: Type.Optional(
-				Type.String({
-					description: "Head branch for 'create' (default: current branch).",
-				}),
-			),
-			base: Type.Optional(
-				Type.String({
-					description:
-						"Base branch for 'create' (default: the repo's default branch).",
-				}),
-			),
-			draft: Type.Optional(
-				Type.Boolean({
-					description: "Create as draft PR.",
-				}),
-			),
-			reviewer: Type.Optional(
-				Type.String({
-					description:
-						"Comma-separated reviewer logins for 'create' (e.g. 'alice,bob').",
-				}),
-			),
-			label: Type.Optional(
-				Type.String({
-					description: "Comma-separated labels for 'create'.",
-				}),
-			),
-			addLabel: Type.Optional(
-				Type.String({
-					description: "Comma-separated labels to add (for 'edit').",
-				}),
-			),
-			removeLabel: Type.Optional(
-				Type.String({
-					description: "Comma-separated labels to remove (for 'edit').",
-				}),
-			),
-			addAssignee: Type.Optional(
-				Type.String({
-					description: "Comma-separated assignees to add (for 'edit').",
-				}),
-			),
-			removeAssignee: Type.Optional(
-				Type.String({
-					description: "Comma-separated assignees to remove (for 'edit').",
-				}),
-			),
-			addReviewer: Type.Optional(
-				Type.String({
-					description: "Comma-separated reviewers to add (for 'edit').",
-				}),
-			),
-			removeReviewer: Type.Optional(
-				Type.String({
-					description: "Comma-separated reviewers to remove (for 'edit').",
-				}),
-			),
-			mergeMethod: Type.Optional(
-				Type.String({
-					description:
-						"Merge method for 'merge': 'merge' (default), 'squash', or 'rebase'.",
-				}),
-			),
-			deleteBranch: Type.Optional(
-				Type.Boolean({
-					description:
-						"For 'merge': delete the head branch after merging (--delete-branch).",
-				}),
-			),
-			reviewEvent: Type.Optional(
-				Type.Union(
-					[
-						Type.Literal("approve"),
-						Type.Literal("request-changes"),
-						Type.Literal("comment"),
-					],
-					{
+				number: Type.Optional(
+					Type.Integer({
 						description:
-							"Review type for 'review': 'approve', 'request-changes', or 'comment' (default).",
-					},
+							"PR number (required for view/edit/checkout/merge/close/reopen/comment/review/diff/checks/ready).",
+						minimum: 1,
+					}),
 				),
-			),
-			nameOnly: Type.Optional(
-				Type.Boolean({
-					description: "For 'diff': show only changed file names.",
-				}),
-			),
-			undo: Type.Optional(
-				Type.Boolean({
-					description: "For 'ready': convert PR back to draft (--undo).",
-				}),
-			),
-		}),
+				state: Type.Optional(
+					Type.Union(
+						[
+							Type.Literal("open"),
+							Type.Literal("closed"),
+							Type.Literal("merged"),
+							Type.Literal("all"),
+						],
+						{
+							description:
+								"Filter by state for 'list': 'open' (default), 'closed', 'merged', or 'all'.",
+						},
+					),
+				),
+				limit: Type.Optional(
+					Type.Integer({
+						description: "Max PRs to list (default: 20, max: 100).",
+						minimum: 1,
+						maximum: 100,
+					}),
+				),
+				title: Type.Optional(
+					Type.String({
+						description:
+							"PR title (required for 'create' unless 'fill' is set; optional for 'edit').",
+					}),
+				),
+				body: Type.Optional(
+					Type.String({
+						description:
+							"PR body/description (for 'create'/'edit'/'comment'/'review'; close comment for 'close'). Defaults to empty string for create.",
+					}),
+				),
+				fill: Type.Optional(
+					Type.Boolean({
+						description:
+							"For 'create': derive title/body from the commits (--fill). Cannot be combined with 'title' or 'body'.",
+					}),
+				),
+				head: Type.Optional(
+					Type.String({
+						description: "Head branch for 'create' (default: current branch).",
+					}),
+				),
+				base: Type.Optional(
+					Type.String({
+						description:
+							"Base branch for 'create' (default: the repo's default branch).",
+					}),
+				),
+				draft: Type.Optional(
+					Type.Boolean({
+						description: "Create as draft PR.",
+					}),
+				),
+				reviewer: Type.Optional(
+					Type.String({
+						description:
+							"Comma-separated reviewer logins for 'create' (e.g. 'alice,bob').",
+					}),
+				),
+				label: Type.Optional(
+					Type.String({
+						description: "Comma-separated labels for 'create'.",
+					}),
+				),
+				addLabel: Type.Optional(
+					Type.String({
+						description: "Comma-separated labels to add (for 'edit').",
+					}),
+				),
+				removeLabel: Type.Optional(
+					Type.String({
+						description: "Comma-separated labels to remove (for 'edit').",
+					}),
+				),
+				addAssignee: Type.Optional(
+					Type.String({
+						description: "Comma-separated assignees to add (for 'edit').",
+					}),
+				),
+				removeAssignee: Type.Optional(
+					Type.String({
+						description: "Comma-separated assignees to remove (for 'edit').",
+					}),
+				),
+				addReviewer: Type.Optional(
+					Type.String({
+						description: "Comma-separated reviewers to add (for 'edit').",
+					}),
+				),
+				removeReviewer: Type.Optional(
+					Type.String({
+						description: "Comma-separated reviewers to remove (for 'edit').",
+					}),
+				),
+				mergeMethod: Type.Optional(
+					Type.String({
+						description:
+							"Merge method for 'merge': 'merge' (default), 'squash', or 'rebase'.",
+					}),
+				),
+				deleteBranch: Type.Optional(
+					Type.Boolean({
+						description:
+							"For 'merge': delete the head branch after merging (--delete-branch).",
+					}),
+				),
+				reviewEvent: Type.Optional(
+					Type.Union(
+						[
+							Type.Literal("approve"),
+							Type.Literal("request-changes"),
+							Type.Literal("comment"),
+						],
+						{
+							description:
+								"Review type for 'review': 'approve', 'request-changes', or 'comment' (default).",
+						},
+					),
+				),
+				nameOnly: Type.Optional(
+					Type.Boolean({
+						description: "For 'diff': show only changed file names.",
+					}),
+				),
+				undo: Type.Optional(
+					Type.Boolean({
+						description: "For 'ready': convert PR back to draft (--undo).",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			// Pure validation first: no gh roundtrip for a request that is

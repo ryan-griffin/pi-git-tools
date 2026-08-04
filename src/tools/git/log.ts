@@ -14,82 +14,85 @@ export function register(pi: ExtensionAPI) {
 		description:
 			"Show commit history with optional count, file filter, author filter, and search string.",
 		promptSnippet: "Show commit history",
-		parameters: Type.Object({
-			count: Type.Optional(
-				Type.Integer({
-					description: "Number of commits to show (default: 10, max: 100).",
-					minimum: 1,
-					maximum: 100,
-				}),
-			),
-			path: Type.Optional(
-				Type.String({
-					description: "Filter commits by file path.",
-				}),
-			),
-			author: Type.Optional(
-				Type.String({
-					description: "Filter commits by author (pattern/regex accepted).",
-				}),
-			),
-			grep: Type.Optional(
-				Type.Array(Type.String(), {
-					description:
-						"Search commit messages for these strings (case-insensitive). Multiple entries use --all-match logic.",
-				}),
-			),
-			branch: Type.Optional(
-				Type.String({
-					description:
-						"Branch name, tag, or revision range (e.g. 'main', 'HEAD~5..HEAD'). Defaults to HEAD.",
-				}),
-			),
-			format: Type.Optional(
-				Type.Union(
-					[
-						Type.Literal("oneline"),
-						Type.Literal("full"),
-						Type.Literal("detailed"),
-					],
-					{
-						description:
-							"Output format: 'oneline' (default), 'full' (with diffstat), or 'detailed' (full body + date).",
-					},
+		parameters: Type.Object(
+			{
+				count: Type.Optional(
+					Type.Integer({
+						description: "Number of commits to show (default: 10, max: 100).",
+						minimum: 1,
+						maximum: 100,
+					}),
 				),
-			),
-			since: Type.Optional(
-				Type.String({
-					description:
-						"Show commits after this date (any format git accepts, e.g. '2024-01-01', '2 weeks ago', 'yesterday').",
-				}),
-			),
-			until: Type.Optional(
-				Type.String({
-					description:
-						"Show commits before this date (any format git accepts, e.g. '2024-06-01', '1 month ago').",
-				}),
-			),
-			noMerges: Type.Optional(
-				Type.Boolean({
-					description: "Exclude merge commits from the log.",
-				}),
-			),
-			graph: Type.Optional(
-				Type.Boolean({
-					description: "Show ASCII commit graph (--graph).",
-				}),
-			),
-			all: Type.Optional(
-				Type.Boolean({
-					description: "Show all branches, not just the current one (--all).",
-				}),
-			),
-			decorate: Type.Optional(
-				Type.Boolean({
-					description: "Show ref names (--decorate).",
-				}),
-			),
-		}),
+				path: Type.Optional(
+					Type.String({
+						description: "Filter commits by file path.",
+					}),
+				),
+				author: Type.Optional(
+					Type.String({
+						description: "Filter commits by author (pattern/regex accepted).",
+					}),
+				),
+				grep: Type.Optional(
+					Type.Array(Type.String(), {
+						description:
+							"Search commit messages for these strings (case-insensitive). Multiple entries use --all-match logic.",
+					}),
+				),
+				branch: Type.Optional(
+					Type.String({
+						description:
+							"Branch name, tag, or revision range (e.g. 'main', 'HEAD~5..HEAD'). Defaults to HEAD.",
+					}),
+				),
+				format: Type.Optional(
+					Type.Union(
+						[
+							Type.Literal("oneline"),
+							Type.Literal("full"),
+							Type.Literal("detailed"),
+						],
+						{
+							description:
+								"Output format: 'oneline' (default), 'full' (with diffstat), or 'detailed' (full body + date).",
+						},
+					),
+				),
+				since: Type.Optional(
+					Type.String({
+						description:
+							"Show commits after this date (any format git accepts, e.g. '2024-01-01', '2 weeks ago', 'yesterday').",
+					}),
+				),
+				until: Type.Optional(
+					Type.String({
+						description:
+							"Show commits before this date (any format git accepts, e.g. '2024-06-01', '1 month ago').",
+					}),
+				),
+				noMerges: Type.Optional(
+					Type.Boolean({
+						description: "Exclude merge commits from the log.",
+					}),
+				),
+				graph: Type.Optional(
+					Type.Boolean({
+						description: "Show ASCII commit graph (--graph).",
+					}),
+				),
+				all: Type.Optional(
+					Type.Boolean({
+						description: "Show all branches, not just the current one (--all).",
+					}),
+				),
+				decorate: Type.Optional(
+					Type.Boolean({
+						description: "Show ref names (--decorate).",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);

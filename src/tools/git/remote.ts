@@ -29,52 +29,55 @@ export function register(pi: ExtensionAPI) {
 		description:
 			"Manage remote repositories: list, add, remove, rename, or change URLs.",
 		promptSnippet: "Manage remotes",
-		parameters: Type.Object({
-			action: Type.Optional(
-				Type.Union(
-					[
-						Type.Literal("list"),
-						Type.Literal("add"),
-						Type.Literal("remove"),
-						Type.Literal("rename"),
-						Type.Literal("set-url"),
-						Type.Literal("get-url"),
-						Type.Literal("set-head"),
-					],
-					{
-						description:
-							"Action: 'list' (default), 'add', 'remove', 'rename', 'set-url', 'get-url', or 'set-head'.",
-					},
+		parameters: Type.Object(
+			{
+				action: Type.Optional(
+					Type.Union(
+						[
+							Type.Literal("list"),
+							Type.Literal("add"),
+							Type.Literal("remove"),
+							Type.Literal("rename"),
+							Type.Literal("set-url"),
+							Type.Literal("get-url"),
+							Type.Literal("set-head"),
+						],
+						{
+							description:
+								"Action: 'list' (default), 'add', 'remove', 'rename', 'set-url', 'get-url', or 'set-head'.",
+						},
+					),
 				),
-			),
-			name: Type.Optional(
-				Type.String({
-					description:
-						"Remote name (required for add/remove/rename/set-url/get-url, e.g. 'origin').",
-				}),
-			),
-			url: Type.Optional(
-				Type.String({
-					description: "Remote URL (required for add/set-url).",
-				}),
-			),
-			newName: Type.Optional(
-				Type.String({
-					description: "New remote name (for 'rename').",
-				}),
-			),
-			push: Type.Optional(
-				Type.Boolean({
-					description: "Operate on the push URL (for 'set-url'/'get-url').",
-				}),
-			),
-			add: Type.Optional(
-				Type.Boolean({
-					description:
-						"Add a push URL instead of replacing (--add for 'set-url').",
-				}),
-			),
-		}),
+				name: Type.Optional(
+					Type.String({
+						description:
+							"Remote name (required for add/remove/rename/set-url/get-url, e.g. 'origin').",
+					}),
+				),
+				url: Type.Optional(
+					Type.String({
+						description: "Remote URL (required for add/set-url).",
+					}),
+				),
+				newName: Type.Optional(
+					Type.String({
+						description: "New remote name (for 'rename').",
+					}),
+				),
+				push: Type.Optional(
+					Type.Boolean({
+						description: "Operate on the push URL (for 'set-url'/'get-url').",
+					}),
+				),
+				add: Type.Optional(
+					Type.Boolean({
+						description:
+							"Add a push URL instead of replacing (--add for 'set-url').",
+					}),
+				),
+			},
+			{ additionalProperties: false },
+		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);
