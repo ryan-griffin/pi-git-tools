@@ -101,10 +101,11 @@ export function register(pi: ExtensionAPI) {
 				case "add": {
 					if (!params.path)
 						throw new Error("'path' is required to add a worktree.");
-					const wkPath = validateDestinationPath(
-						params.path.trim(),
-						"worktree path",
-					);
+					// Pass the path through verbatim (no trim): paths may legitimately
+					// end in spaces/tabs, and silently altering them would corrupt the
+					// requested destination (see utils.ts stripTrailingTerminator).
+					// Matches git_clone/git_init.
+					const wkPath = validateDestinationPath(params.path, "worktree path");
 					if (params.branch) {
 						if (params.detach) validateCommitish(params.branch, "branch");
 						else validateBranchName(params.branch, "branch");
@@ -135,10 +136,7 @@ export function register(pi: ExtensionAPI) {
 				case "remove": {
 					if (!params.path)
 						throw new Error("'path' is required to remove a worktree.");
-					const wkPath = validateDestinationPath(
-						params.path.trim(),
-						"worktree path",
-					);
+					const wkPath = validateDestinationPath(params.path, "worktree path");
 					const args = ["worktree", "remove"];
 					if (params.force) args.push("--force");
 					args.push(wkPath);
@@ -169,10 +167,7 @@ export function register(pi: ExtensionAPI) {
 				case "lock": {
 					if (!params.path)
 						throw new Error("'path' is required to lock a worktree.");
-					const wkPath = validateDestinationPath(
-						params.path.trim(),
-						"worktree path",
-					);
+					const wkPath = validateDestinationPath(params.path, "worktree path");
 					await run(
 						"git",
 						["worktree", "lock", wkPath],
@@ -193,10 +188,7 @@ export function register(pi: ExtensionAPI) {
 				case "unlock": {
 					if (!params.path)
 						throw new Error("'path' is required to unlock a worktree.");
-					const wkPath = validateDestinationPath(
-						params.path.trim(),
-						"worktree path",
-					);
+					const wkPath = validateDestinationPath(params.path, "worktree path");
 					await run(
 						"git",
 						["worktree", "unlock", wkPath],
