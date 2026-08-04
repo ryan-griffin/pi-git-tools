@@ -146,6 +146,45 @@ describe("run output whitespace handling", () => {
 });
 
 // ---------------------------------------------------------------------------
+// run — env safety overrides
+// ---------------------------------------------------------------------------
+describe("run env safety overrides", () => {
+	it("forces color.ui=never regardless of repo config", async () => {
+		const { run } = await import("../../src/utils.ts");
+		const base = mkdtempSync(resolve(tmpdir(), "pi-git-tools-test-"));
+		try {
+			const repoPath = resolve(base, "colorrepo");
+			mkdirSync(repoPath, { recursive: true });
+			execFileSync("git", ["init", "-q"], { cwd: repoPath });
+			execFileSync("git", ["config", "color.ui", "always"], {
+				cwd: repoPath,
+			});
+			// GIT_CONFIG_COUNT config outranks the repo's local config.
+			assert.equal(await run("git", ["config", "color.ui"], repoPath), "never");
+
+			// No ANSI escapes in output that would be colored under
+			// color.ui=always (git branch lists the current branch in green).
+			execFileSync("git", ["config", "user.name", "Test User"], {
+				cwd: repoPath,
+			});
+			execFileSync("git", ["config", "user.email", "test@example.com"], {
+				cwd: repoPath,
+			});
+			execFileSync("git", ["commit", "-q", "--allow-empty", "-m", "c1"], {
+				cwd: repoPath,
+			});
+			const branch = await run("git", ["branch", "-vv"], repoPath);
+			assert.ok(
+				!branch.includes("\u001b["),
+				`branch output has no ANSI escapes, got: ${JSON.stringify(branch)}`,
+			);
+		} finally {
+			rmSync(base, { recursive: true, force: true });
+		}
+	});
+});
+
+// ---------------------------------------------------------------------------
 // run — error path tests
 // ---------------------------------------------------------------------------
 describe("run error handling", () => {

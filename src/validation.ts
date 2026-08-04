@@ -310,7 +310,15 @@ export function validateRemoteUrl(url: string, field = "url"): string {
 // Search Query Validation
 // ---------------------------------------------------------------------------
 
-/** Validate a search query for GitHub search (prevents qualifier injection). */
+/**
+ * Validate a search query for GitHub search.
+ *
+ * Only the shell metacharacters are blocked: commands run through execFile
+ * (never a shell), so there is no injection risk from the rest — and GitHub's
+ * own search syntax legitimately uses parens and angle brackets for grouping
+ * (e.g. '(is:issue is:open)') and comparison qualifiers (e.g. 'stars:>100',
+ * 'created:>2024-01-01'), which must pass through.
+ */
 export function validateSearchQuery(query: string, field = "query"): string {
 	if (!query || typeof query !== "string") {
 		throw new ValidationError(`${field}: must be a non-empty string`);
@@ -318,14 +326,20 @@ export function validateSearchQuery(query: string, field = "query"): string {
 	if (query.length > 1000) {
 		throw new ValidationError(`${field}: too long (max 1000 chars)`);
 	}
-	// Block shell metacharacters and potential qualifier injection
-	if (containsControlCharacters(query) || /[;&|`$()<>]/.test(query)) {
+	// Block shell metacharacters; everything else is safe as a positional argv
+	if (containsControlCharacters(query) || /[;&|`$]/.test(query)) {
 		throw new ValidationError(`${field}: contains invalid characters`);
 	}
 	return query;
 }
 
-/** Validate an exclude pattern for git clean. */
+/**
+ * Validate an exclude pattern for git clean.
+ *
+ * Same character policy as validateSearchQuery: only shell metacharacters
+ * are blocked — execFile never invokes a shell, and file paths legitimately
+ * contain parens and angle brackets (e.g. 'foo (backup)/', 'a < b.txt').
+ */
 export function validateExcludePattern(pattern: string): string {
 	if (!pattern || typeof pattern !== "string") {
 		throw new ValidationError("exclude pattern: must be a non-empty string");
@@ -333,7 +347,7 @@ export function validateExcludePattern(pattern: string): string {
 	if (
 		containsControlCharacters(pattern) ||
 		pattern.startsWith("-") ||
-		/[;&|`$()<>]/.test(pattern)
+		/[;&|`$]/.test(pattern)
 	) {
 		throw new ValidationError(
 			`exclude pattern: contains invalid characters '${pattern}'`,

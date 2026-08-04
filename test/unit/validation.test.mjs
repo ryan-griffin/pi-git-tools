@@ -446,12 +446,26 @@ describe("validateSearchQuery", () => {
 		);
 	});
 
-	it("rejects null/undefined/empty", () => {
-		expectError(() => validateSearchQuery(""), "must be a non-empty string");
-		expectError(() => validateSearchQuery(null), "must be a non-empty string");
+	it("accepts GitHub comparison and grouping syntax", () => {
+		assert.equal(
+			validateSearchQuery("stars:>100 language:go"),
+			"stars:>100 language:go",
+		);
+		assert.equal(
+			validateSearchQuery("created:>2024-01-01"),
+			"created:>2024-01-01",
+		);
+		assert.equal(
+			validateSearchQuery("pushed:<2023-06-01"),
+			"pushed:<2023-06-01",
+		);
+		assert.equal(
+			validateSearchQuery("is:issue (is:open is:pr)"),
+			"is:issue (is:open is:pr)",
+		);
 	});
 
-	it("rejects shell metacharacters", () => {
+	it("still rejects shell metacharacters", () => {
 		expectError(
 			() => validateSearchQuery("query; rm -rf /"),
 			"invalid characters",
@@ -460,6 +474,16 @@ describe("validateSearchQuery", () => {
 			() => validateSearchQuery("$(cat /etc/passwd)"),
 			"invalid characters",
 		);
+		expectError(
+			() => validateSearchQuery("cmd & background"),
+			"invalid characters",
+		);
+		expectError(() => validateSearchQuery("a | b"), "invalid characters");
+	});
+
+	it("rejects null/undefined/empty", () => {
+		expectError(() => validateSearchQuery(""), "must be a non-empty string");
+		expectError(() => validateSearchQuery(null), "must be a non-empty string");
 	});
 
 	it("rejects too-long queries", () => {
@@ -477,6 +501,12 @@ describe("validateExcludePattern", () => {
 		assert.equal(validateExcludePattern(".DS_Store"), ".DS_Store");
 	});
 
+	it("accepts parens and angle brackets in path patterns", () => {
+		assert.equal(validateExcludePattern("foo (backup)/"), "foo (backup)/");
+		assert.equal(validateExcludePattern("a < b.txt"), "a < b.txt");
+		assert.equal(validateExcludePattern("* (old)*"), "* (old)*");
+	});
+
 	it("rejects null/undefined/empty", () => {
 		expectError(() => validateExcludePattern(""), "must be a non-empty string");
 		expectError(
@@ -491,6 +521,8 @@ describe("validateExcludePattern", () => {
 			() => validateExcludePattern("$(whoami)"),
 			"invalid characters",
 		);
+		expectError(() => validateExcludePattern("a & b"), "invalid characters");
+		expectError(() => validateExcludePattern("a | b"), "invalid characters");
 	});
 });
 

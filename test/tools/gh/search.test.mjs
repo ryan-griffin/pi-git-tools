@@ -26,6 +26,18 @@ describe("gh_search", () => {
 		);
 	});
 
+	it("rejects created sort for repos (only stars/forks/updated)", async () => {
+		await assert.rejects(
+			() =>
+				execTool(ghTools, "gh_search", {
+					type: "repos",
+					query: "test",
+					sort: "created",
+				}),
+			(err) => err.message.includes("Sort"),
+		);
+	});
+
 	it("rejects stars sort for code", async () => {
 		await assert.rejects(
 			() =>

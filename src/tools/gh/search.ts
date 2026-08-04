@@ -189,7 +189,11 @@ export function register(pi: ExtensionAPI) {
 					],
 					{
 						description:
-							"Sort order: 'best-match' (default), 'stars', 'forks', 'updated', or 'created'.",
+							"Sort order: 'best-match' (default), or a type-specific sort — " +
+							"'stars'/'forks'/'updated' for repos, 'created'/'updated' for " +
+							"issues and PRs, 'author-date'/'committer-date' for commits. " +
+							"A sort unsupported for the chosen type is rejected; code search " +
+							"cannot be sorted.",
 					},
 				),
 			),

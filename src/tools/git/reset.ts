@@ -23,10 +23,18 @@ export function register(pi: ExtensionAPI) {
 				}),
 			),
 			mode: Type.Optional(
-				Type.String({
-					description:
-						"Reset mode: 'soft' (keep staged), 'mixed' (keep unstaged, default), 'hard' (discard all changes), 'keep' (like hard but keeps local changes).",
-				}),
+				Type.Union(
+					[
+						Type.Literal("soft"),
+						Type.Literal("mixed"),
+						Type.Literal("hard"),
+						Type.Literal("keep"),
+					],
+					{
+						description:
+							"Reset mode: 'soft' (keep staged), 'mixed' (keep unstaged, default), 'hard' (discard all changes), 'keep' (like hard but keeps local changes).",
+					},
+				),
 			),
 		}),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {

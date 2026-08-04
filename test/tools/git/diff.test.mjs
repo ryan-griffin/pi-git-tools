@@ -79,10 +79,20 @@ describe("diff", () => {
 		);
 	});
 
-	it("git_diff rejects staged with ref", async () => {
-		await assert.rejects(
-			() => execTool(gitTools, "git_diff", { staged: true, ref: "HEAD" }),
-			(err) => err.message.includes("staged"),
+	it("git_diff combines staged with ref (index vs commit)", async () => {
+		const result = await execTool(gitTools, "git_diff", {
+			staged: true,
+			ref: "HEAD~1",
+		});
+		// The index holds the 'Add src files' commit plus the staged.txt fixture,
+		// so the index-vs-HEAD~1 diff is non-empty and reports files.
+		assert.ok(
+			result.content[0].text.length > 0,
+			"staged+ref diff is non-empty",
+		);
+		assert.ok(
+			(result.details?.files ?? 0) >= 1,
+			"staged+ref diff reports files",
 		);
 	});
 
