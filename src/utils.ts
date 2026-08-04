@@ -9,6 +9,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
+import { gitErrorHint } from "./hints.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -17,6 +18,8 @@ export class CommandError extends Error {
 	readonly exitCode?: number | string;
 	readonly stdout: string;
 	readonly stderr: string;
+	/** Tool-schema suggestion for known git failures (git commands only). */
+	readonly hint?: string;
 
 	constructor(
 		message: string,
@@ -24,6 +27,7 @@ export class CommandError extends Error {
 			exitCode?: number | string;
 			stdout?: string;
 			stderr?: string;
+			hint?: string;
 		} = {},
 	) {
 		super(message);
@@ -31,6 +35,7 @@ export class CommandError extends Error {
 		this.exitCode = options.exitCode;
 		this.stdout = options.stdout ?? "";
 		this.stderr = options.stderr ?? "";
+		this.hint = options.hint;
 	}
 }
 
@@ -80,6 +85,9 @@ const SAFE_ENV: Record<string, string> = {
 	GH_PROMPT_DISABLED: "1",
 	// Prefer non-interactive gh behavior in agent contexts
 	GH_NO_UPDATE_NOTIFIER: "1",
+	// Deterministic English git messages regardless of host locale, so the
+	// hint patterns (src/hints.ts) and error parsing never depend on locale.
+	LC_ALL: "C",
 	// Never emit ANSI colors, regardless of the user's color.ui setting
 	// (color.ui=always leaks escape sequences into tool output). The
 	// GIT_CONFIG_COUNT pair is read as highest-precedence config, like -c.
@@ -169,10 +177,20 @@ export async function run(
 			const msg = stripTrailingTerminator(
 				stderr || stdout || e.message || String(err),
 			);
-			throw new CommandError(msg || String(err), {
+			// Known git failures get a tool-schema suggestion (git only; gh
+			// errors pass through untouched). Match against BOTH streams: git
+			// merge/cherry-pick write CONFLICT text to stdout, while other
+			// failures (push rejected, refs) go to stderr. The hint survives
+			// tail-first error truncation because it is appended last.
+			const hint =
+				bin === "git"
+					? gitErrorHint(args, `${stderr}\n${stdout}`, e.code)
+					: undefined;
+			throw new CommandError(hint ? `${msg}\n\n[Hint: ${hint}]` : msg, {
 				exitCode: e.code,
 				stdout,
 				stderr,
+				hint: hint ?? undefined,
 			});
 		}
 		throw err;
