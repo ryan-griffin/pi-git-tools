@@ -31,13 +31,12 @@ export function register(pi: ExtensionAPI) {
 				),
 				stat: Type.Optional(
 					Type.Boolean({
-						description:
-							"Show diffstat summary instead of the full patch (--stat).",
+						description: "Show diffstat summary instead of the full patch.",
 					}),
 				),
 				nameOnly: Type.Optional(
 					Type.Boolean({
-						description: "Show only names of changed files (--name-only).",
+						description: "Show only names of changed files.",
 					}),
 				),
 			},

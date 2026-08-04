@@ -35,13 +35,12 @@ export function register(pi: ExtensionAPI) {
 				),
 				allowEmpty: Type.Optional(
 					Type.Boolean({
-						description: "Allow an empty commit (--allow-empty).",
+						description: "Allow an empty commit.",
 					}),
 				),
 				signoff: Type.Optional(
 					Type.Boolean({
-						description:
-							"Add Signed-off-by line (--signoff) for DCO compliance.",
+						description: "Add Signed-off-by line for DCO compliance.",
 					}),
 				),
 			},

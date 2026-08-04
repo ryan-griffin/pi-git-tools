@@ -23,7 +23,7 @@ export function register(pi: ExtensionAPI) {
 		label: "Git Merge",
 		description:
 			"Merge a branch into the current branch, or continue/abort an in-progress merge. " +
-			"Use --no-ff to force a merge commit, --squash to squash commits.",
+			"Supports merge commits, squashing, and fast-forward-only merges.",
 		promptSnippet: "Merge a branch",
 		parameters: Type.Object(
 			{
@@ -49,24 +49,25 @@ export function register(pi: ExtensionAPI) {
 				noFF: Type.Optional(
 					Type.Boolean({
 						description:
-							"Create a merge commit even when fast-forward is possible (--no-ff). Cannot be used with squash.",
+							"Create a merge commit even when fast-forward is possible. Cannot be used with squash.",
 					}),
 				),
 				squash: Type.Optional(
 					Type.Boolean({
 						description:
-							"Squash commits from the source branch into one (--squash). Only stages changes — you must run git_commit afterwards. Cannot be used with noFF.",
+							"Squash commits from the source branch into one. Only stages changes — you must run git_commit afterwards. Cannot be used with noFF.",
 					}),
 				),
 				message: Type.Optional(
 					Type.String({
-						description: "Merge message (for --no-ff merge commits).",
+						description:
+							"Merge message for the merge commit (e.g. when 'noFF' is set).",
 					}),
 				),
 				ffOnly: Type.Optional(
 					Type.Boolean({
 						description:
-							"Only merge if fast-forward is possible (--ff-only). Refuses to merge if divergence exists.",
+							"Only merge if fast-forward is possible. Refuses to merge if divergence exists.",
 					}),
 				),
 			},

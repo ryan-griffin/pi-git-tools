@@ -47,14 +47,13 @@ export function register(pi: ExtensionAPI) {
 				),
 				noCommit: Type.Optional(
 					Type.Boolean({
-						description:
-							"Apply the inverse change without creating a commit (--no-commit).",
+						description: "Apply the inverse change without creating a commit.",
 					}),
 				),
 				edit: Type.Optional(
 					Type.Boolean({
 						description:
-							"Edit the revert commit message (--edit). Not supported headlessly — will error if true.",
+							"Edit the revert commit message. Not supported headlessly — will error if true.",
 					}),
 				),
 			},

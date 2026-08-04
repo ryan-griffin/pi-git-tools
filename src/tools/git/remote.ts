@@ -71,8 +71,7 @@ export function register(pi: ExtensionAPI) {
 				),
 				add: Type.Optional(
 					Type.Boolean({
-						description:
-							"Add a push URL instead of replacing (--add for 'set-url').",
+						description: "Add a push URL instead of replacing (for 'set-url').",
 					}),
 				),
 			},

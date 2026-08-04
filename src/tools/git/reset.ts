@@ -12,7 +12,7 @@ export function register(pi: ExtensionAPI) {
 		name: "git_reset",
 		label: "Git Reset",
 		description:
-			"Reset the current HEAD to a specified state. Supports --soft (keep changes staged), --mixed (keep changes unstaged, default), and --hard (discard changes). " +
+			"Reset the current HEAD to a specified state. Supports soft (keep changes staged), mixed (keep changes unstaged, default), and hard (discard changes) modes. " +
 			"File-level operations (unstage, discard) live in git_restore.",
 		promptSnippet: "Reset HEAD to a previous state",
 		parameters: Type.Object(

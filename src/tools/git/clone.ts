@@ -43,8 +43,7 @@ export function register(pi: ExtensionAPI) {
 				),
 				singleBranch: Type.Optional(
 					Type.Boolean({
-						description:
-							"Only clone the history for the specified branch (--single-branch).",
+						description: "Only clone the history for the specified branch.",
 					}),
 				),
 				filter: Type.Optional(
@@ -55,8 +54,7 @@ export function register(pi: ExtensionAPI) {
 				),
 				recurseSubmodules: Type.Optional(
 					Type.Boolean({
-						description:
-							"Initialize and clone submodules recursively (--recurse-submodules).",
+						description: "Initialize and clone submodules recursively.",
 					}),
 				),
 			},

@@ -42,7 +42,7 @@ export function register(pi: ExtensionAPI) {
 				params: Type.Optional(
 					Type.Record(Type.String(), Type.String(), {
 						description:
-							"Query/form parameters as key-value pairs (e.g. { per_page: '100' }), passed as -f key=value.",
+							"Query/form parameters as key-value pairs (e.g. { per_page: '100' }).",
 					}),
 				),
 				field: Type.Optional(
@@ -53,8 +53,7 @@ export function register(pi: ExtensionAPI) {
 				),
 				paginate: Type.Optional(
 					Type.Boolean({
-						description:
-							"Automatically fetch all pages of results (--paginate).",
+						description: "Automatically fetch all pages of results.",
 					}),
 				),
 			},

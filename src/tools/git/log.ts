@@ -36,7 +36,7 @@ export function register(pi: ExtensionAPI) {
 				grep: Type.Optional(
 					Type.Array(Type.String(), {
 						description:
-							"Search commit messages for these strings (case-insensitive). Multiple entries use --all-match logic.",
+							"Search commit messages for these strings (case-insensitive). Multiple entries must all match.",
 					}),
 				),
 				branch: Type.Optional(
@@ -77,17 +77,17 @@ export function register(pi: ExtensionAPI) {
 				),
 				graph: Type.Optional(
 					Type.Boolean({
-						description: "Show ASCII commit graph (--graph).",
+						description: "Show ASCII commit graph.",
 					}),
 				),
 				all: Type.Optional(
 					Type.Boolean({
-						description: "Show all branches, not just the current one (--all).",
+						description: "Show all branches, not just the current one.",
 					}),
 				),
 				decorate: Type.Optional(
 					Type.Boolean({
-						description: "Show ref names (--decorate).",
+						description: "Show ref names.",
 					}),
 				),
 			},

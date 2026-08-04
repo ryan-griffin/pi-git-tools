@@ -18,7 +18,7 @@ export function register(pi: ExtensionAPI) {
 		name: "git_apply",
 		label: "Git Apply",
 		description:
-			"Apply a unified diff patch to the working tree (e.g. output from git_diff). Supports --3way, --reverse, --check (dry-run), and --cached (index only).",
+			"Apply a unified diff patch to the working tree (e.g. output from git_diff). Supports 3-way merges, reverse application, dry-run checks, and index-only application.",
 		promptSnippet: "Apply a patch",
 		parameters: Type.Object(
 			{
@@ -28,24 +28,24 @@ export function register(pi: ExtensionAPI) {
 				threeway: Type.Optional(
 					Type.Boolean({
 						description:
-							"Fall back to a 3-way merge when the patch context is stale (--3way).",
+							"Fall back to a 3-way merge when the patch context is stale.",
 					}),
 				),
 				reverse: Type.Optional(
 					Type.Boolean({
-						description: "Apply the patch in reverse (--reverse).",
+						description: "Apply the patch in reverse.",
 					}),
 				),
 				check: Type.Optional(
 					Type.Boolean({
 						description:
-							"Dry-run: verify the patch applies without changing anything (--check).",
+							"Dry-run: verify the patch applies without changing anything.",
 					}),
 				),
 				cached: Type.Optional(
 					Type.Boolean({
 						description:
-							"Apply the patch to the index only, leaving the working tree untouched (--cached).",
+							"Apply the patch to the index only, leaving the working tree untouched.",
 					}),
 				),
 			},

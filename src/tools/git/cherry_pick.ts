@@ -49,19 +49,18 @@ export function register(pi: ExtensionAPI) {
 				),
 				noCommit: Type.Optional(
 					Type.Boolean({
-						description:
-							"Apply changes without creating a commit (--no-commit).",
+						description: "Apply changes without creating a commit.",
 					}),
 				),
 				signoff: Type.Optional(
 					Type.Boolean({
-						description: "Add Signed-off-by line (--signoff).",
+						description: "Add Signed-off-by line.",
 					}),
 				),
 				edit: Type.Optional(
 					Type.Boolean({
 						description:
-							"Edit commit message (--edit). Not supported headlessly — will error if true.",
+							"Edit commit message. Not supported headlessly — will error if true.",
 					}),
 				),
 			},

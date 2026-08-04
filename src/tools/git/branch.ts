@@ -64,7 +64,7 @@ export function register(pi: ExtensionAPI) {
 				force: Type.Optional(
 					Type.Boolean({
 						description:
-							"Force delete (-D), force-create, or force-switch (discards local changes) — use with caution.",
+							"Force delete, force-create, or force-switch (discards local changes) — use with caution.",
 					}),
 				),
 				startPoint: Type.Optional(
@@ -76,7 +76,7 @@ export function register(pi: ExtensionAPI) {
 				checkout: Type.Optional(
 					Type.Boolean({
 						description:
-							"After 'create', switch to the new branch (git switch -c). Default: false.",
+							"After 'create', switch to the new branch. Default: false.",
 					}),
 				),
 				track: Type.Optional(

@@ -20,30 +20,30 @@ export function register(pi: ExtensionAPI) {
 				dryRun: Type.Optional(
 					Type.Boolean({
 						description:
-							"Show what would be removed without actually removing (--dry-run).",
+							"Show what would be removed without actually removing.",
 					}),
 				),
 				force: Type.Optional(
 					Type.Boolean({
 						description:
-							"Force removal of untracked files (-f). Always required to actually remove files (unless dryRun).",
+							"Force removal of untracked files. Always required to actually remove files (unless dryRun).",
 					}),
 				),
 				directories: Type.Optional(
 					Type.Boolean({
-						description: "Remove untracked directories as well (-d).",
+						description: "Remove untracked directories as well.",
 					}),
 				),
 				excludePattern: Type.Optional(
 					Type.String({
 						description:
-							"Skip files matching this pattern (--exclude). Comma-separated for multiple patterns.",
+							"Skip files matching this pattern. Comma-separated for multiple patterns.",
 					}),
 				),
 				interactive: Type.Optional(
 					Type.Boolean({
 						description:
-							"Show files interactively for confirmation (-i). Refuses to run in non-TTY environments.",
+							"Show files interactively for confirmation. Refuses to run in non-TTY environments.",
 					}),
 				),
 			},
