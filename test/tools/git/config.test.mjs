@@ -130,4 +130,28 @@ describe("config", () => {
 			`value retains trailing spaces: "${getResult.content[0].text}"`,
 		);
 	});
+
+	it("git_config rejects action-inapplicable params", async () => {
+		await assert.rejects(
+			() =>
+				execTool(gitTools, "git_config", {
+					action: "list",
+					type: "bool",
+				}),
+			(err) =>
+				err.message.includes("'type' is only valid for action(s): get, set"),
+		);
+		await assert.rejects(
+			() =>
+				execTool(gitTools, "git_config", {
+					action: "unset",
+					name: "test.key",
+					value: "x",
+				}),
+			(err) =>
+				err.message.includes(
+					"'value' is only valid for action(s): set, add, unset-all",
+				),
+		);
+	});
 });

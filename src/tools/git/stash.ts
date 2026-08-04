@@ -5,7 +5,20 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import { registerTool } from "../../truncate.js";
 import { findRepoRoot, resolveCwd, run } from "../../utils.js";
-import { validateGitPath } from "../../validation.js";
+import {
+	assertParamsValidForAction,
+	validateGitPath,
+} from "../../validation.js";
+
+/** Params valid per action; everything else present is rejected up front. */
+const ACTION_PARAMS: Record<string, readonly string[]> = {
+	list: [],
+	push: ["message", "includeUntracked", "keepIndex", "paths"],
+	pop: ["index"],
+	apply: ["index"],
+	drop: ["index"],
+	show: ["index", "patch"],
+};
 
 export function register(pi: ExtensionAPI) {
 	registerTool(pi, {
@@ -72,6 +85,7 @@ export function register(pi: ExtensionAPI) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);
 			const action = params.action || "list";
+			assertParamsValidForAction("git_stash", action, params, ACTION_PARAMS);
 			const idx =
 				typeof params.index === "number"
 					? `stash@{${params.index}}`
@@ -119,14 +133,6 @@ export function register(pi: ExtensionAPI) {
 					};
 				}
 				case "pop": {
-					if (params.keepIndex || params.includeUntracked) {
-						throw new Error(
-							"includeUntracked and keepIndex are only valid for stash push.",
-						);
-					}
-					if (params.paths?.length) {
-						throw new Error("'paths' is only valid for stash push.");
-					}
 					const args = ["stash", "pop"];
 					if (idx) args.push(idx);
 					const output = await run("git", args, root, undefined, _signal);
@@ -136,14 +142,6 @@ export function register(pi: ExtensionAPI) {
 					};
 				}
 				case "apply": {
-					if (params.keepIndex || params.includeUntracked) {
-						throw new Error(
-							"includeUntracked and keepIndex are only valid for stash push.",
-						);
-					}
-					if (params.paths?.length) {
-						throw new Error("'paths' is only valid for stash push.");
-					}
 					const args = ["stash", "apply"];
 					if (idx) args.push(idx);
 					const output = await run("git", args, root, undefined, _signal);

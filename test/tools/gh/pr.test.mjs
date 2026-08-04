@@ -145,4 +145,57 @@ describe("gh_pr", () => {
 			(err) => err.message.includes("positive integer"),
 		);
 	});
+
+	it("gh_pr rejects action-inapplicable params", async () => {
+		await assert.rejects(
+			() =>
+				execTool(ghTools, "gh_pr", {
+					action: "list",
+					repo: "test/repo",
+					mergeMethod: "squash",
+				}),
+			(err) =>
+				err.message.includes(
+					"'mergeMethod' is only valid for action(s): merge",
+				),
+		);
+		await assert.rejects(
+			() =>
+				execTool(ghTools, "gh_pr", {
+					action: "create",
+					repo: "test/repo",
+					title: "x",
+					undo: true,
+				}),
+			(err) =>
+				err.message.includes("'undo' is only valid for action(s): ready"),
+		);
+	});
+
+	it("gh_issue rejects action-inapplicable params", async () => {
+		await assert.rejects(
+			() =>
+				execTool(ghTools, "gh_issue", {
+					action: "close",
+					repo: "test/repo",
+					number: 1,
+					title: "rename me",
+				}),
+			(err) =>
+				err.message.includes(
+					"'title' is only valid for action(s): create, edit",
+				),
+		);
+		await assert.rejects(
+			() =>
+				execTool(ghTools, "gh_issue", {
+					action: "create",
+					repo: "test/repo",
+					title: "x",
+					state: "open",
+				}),
+			(err) =>
+				err.message.includes("'state' is only valid for action(s): list"),
+		);
+	});
 });

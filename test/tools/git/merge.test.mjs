@@ -96,4 +96,16 @@ describe("merge", () => {
 			}
 		}
 	});
+
+	it("git_merge rejects params on abort", async () => {
+		await assert.rejects(
+			() =>
+				execTool(gitTools, "git_merge", {
+					action: "abort",
+					branch: "test-merge-source",
+				}),
+			(err) =>
+				err.message.includes("'branch' is only valid for action(s): merge"),
+		);
+	});
 });

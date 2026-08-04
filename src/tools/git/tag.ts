@@ -6,10 +6,19 @@ import { Type } from "typebox";
 import { registerTool } from "../../truncate.js";
 import { findRepoRoot, resolveCwd, run } from "../../utils.js";
 import {
+	assertParamsValidForAction,
 	validateCommandValue,
 	validateCommitish,
 	validateTagName,
 } from "../../validation.js";
+
+/** Params valid per action; everything else present is rejected up front. */
+const ACTION_PARAMS: Record<string, readonly string[]> = {
+	list: ["listPattern"],
+	create: ["name", "target", "message", "force", "sign"],
+	delete: ["name"],
+	verify: ["name"],
+};
 
 export function register(pi: ExtensionAPI) {
 	registerTool(pi, {
@@ -72,6 +81,7 @@ export function register(pi: ExtensionAPI) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);
 			const action = params.action || "list";
+			assertParamsValidForAction("git_tag", action, params, ACTION_PARAMS);
 
 			switch (action) {
 				case "list": {

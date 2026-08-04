@@ -6,7 +6,21 @@ import { truncateLine } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import { registerTool } from "../../truncate.js";
 import { findRepoRoot, resolveCwd, run } from "../../utils.js";
-import { validateConfigKey } from "../../validation.js";
+import {
+	assertParamsValidForAction,
+	validateConfigKey,
+} from "../../validation.js";
+
+/** Params valid per action; everything else present is rejected up front. */
+const ACTION_PARAMS: Record<string, readonly string[]> = {
+	get: ["name", "scope", "type"],
+	set: ["name", "value", "scope", "type"],
+	list: ["name", "scope"],
+	unset: ["name", "scope"],
+	add: ["name", "value", "scope"],
+	"unset-all": ["name", "value", "scope"],
+	"remove-section": ["name", "scope"],
+};
 
 export function register(pi: ExtensionAPI) {
 	registerTool(pi, {
@@ -77,6 +91,7 @@ export function register(pi: ExtensionAPI) {
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
 			const action = params.action || "get";
+			assertParamsValidForAction("git_config", action, params, ACTION_PARAMS);
 			const scope = params.scope || "local";
 
 			const validScopes = ["local", "global", "system"];

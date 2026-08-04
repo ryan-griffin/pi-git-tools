@@ -5,7 +5,20 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import { registerTool } from "../../truncate.js";
 import { findRepoRoot, resolveCwd, run } from "../../utils.js";
-import { validateBranchName, validateCommitish } from "../../validation.js";
+import {
+	assertParamsValidForAction,
+	validateBranchName,
+	validateCommitish,
+} from "../../validation.js";
+
+/** Params valid per action; everything else present is rejected up front. */
+const ACTION_PARAMS: Record<string, readonly string[]> = {
+	list: ["remote"],
+	create: ["name", "force", "startPoint", "checkout"],
+	delete: ["name", "force"],
+	rename: ["name", "newName"],
+	switch: ["name", "force", "track"],
+};
 
 export function register(pi: ExtensionAPI) {
 	registerTool(pi, {
@@ -76,6 +89,7 @@ export function register(pi: ExtensionAPI) {
 			const cwd = resolveCwd(ctx);
 			const root = await findRepoRoot(cwd, _signal);
 			const action = params.action || "list";
+			assertParamsValidForAction("git_branch", action, params, ACTION_PARAMS);
 
 			switch (action) {
 				case "list": {

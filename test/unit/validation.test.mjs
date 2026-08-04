@@ -1,5 +1,5 @@
 /**
- * Unit tests for src/validation.ts — all 11 validation functions.
+ * Unit tests for src/validation.ts — all 12 validation functions.
  *
  * Tests cover: valid inputs, invalid inputs, boundary conditions,
  * null/undefined handling, and error message format.
@@ -25,6 +25,7 @@ const {
 	validateRemoteUrl,
 	validateSearchQuery,
 	validateExcludePattern,
+	assertParamsValidForAction,
 } = await import("../../src/validation.ts");
 
 const { validateDestinationPath, validateCommandValue } = await import(
@@ -623,5 +624,103 @@ describe("validateCommandValue", () => {
 
 	it("rejects control characters", () => {
 		expectError(() => validateCommandValue("a\u0000b"), "control characters");
+	});
+});
+
+// ---------------------------------------------------------------------------
+// assertParamsValidForAction
+// ---------------------------------------------------------------------------
+describe("assertParamsValidForAction", () => {
+	const TABLE = {
+		list: [],
+		create: ["name", "force"],
+		delete: ["name"],
+	};
+
+	it("passes when all present params are valid for the action", () => {
+		assert.doesNotThrow(() =>
+			assertParamsValidForAction(
+				"test_tool",
+				"create",
+				{ action: "create", name: "x", force: true },
+				TABLE,
+			),
+		);
+	});
+
+	it("passes when params are present but undefined", () => {
+		// Schema-optional params arrive as undefined when omitted; they must
+		// not be flagged even when invalid for the action.
+		assert.doesNotThrow(() =>
+			assertParamsValidForAction(
+				"test_tool",
+				"list",
+				{ action: "list", name: undefined, force: undefined },
+				TABLE,
+			),
+		);
+	});
+
+	it("passes for an empty params object", () => {
+		assert.doesNotThrow(() =>
+			assertParamsValidForAction(
+				"test_tool",
+				"list",
+				{ action: "list" },
+				TABLE,
+			),
+		);
+	});
+
+	it("rejects a single invalid param and names the valid actions", () => {
+		expectError(
+			() =>
+				assertParamsValidForAction(
+					"test_tool",
+					"list",
+					{ action: "list", force: true },
+					TABLE,
+				),
+			"'force' is only valid for action(s): create (got action='list')",
+		);
+	});
+
+	it("rejects multiple invalid params in one message", () => {
+		expectError(
+			() =>
+				assertParamsValidForAction(
+					"test_tool",
+					"list",
+					{ action: "list", name: "x", force: true },
+					TABLE,
+				),
+			"'name' is only valid for action(s): create, delete; 'force' is only valid for action(s): create (got action='list')",
+		);
+	});
+
+	it("says 'not valid for any action' for params in no action", () => {
+		expectError(
+			() =>
+				assertParamsValidForAction(
+					"test_tool",
+					"list",
+					{ action: "list", bogus: 1 },
+					TABLE,
+				),
+			"'bogus' is not valid for any action (got action='list')",
+		);
+	});
+
+	it("throws ValidationError", () => {
+		assert.throws(
+			() =>
+				assertParamsValidForAction(
+					"t",
+					"list",
+					{ action: "list", force: true },
+					TABLE,
+				),
+			ValidationError,
+		);
 	});
 });

@@ -117,6 +117,7 @@ npm run precommit     # all of the above
 - **GIT_EDITOR=true**: Blocks editor prompts in headless mode (`--no-edit` for amend/revert); callers cannot override safety-critical prompt/editor variables
 - **GH_PROMPT_DISABLED=1**: Blocks interactive gh prompts
 - **Input validation**: refs, paths, config keys, remote URLs, search queries, destinations, and command values are validated before execution; option-like values are rejected
+- **Action-scoped params**: every tool with an `action` parameter rejects parameters that don't apply to the requested action (e.g. `title` with `action=close`) instead of silently ignoring them; the error names the actions where each parameter is valid
 - **Repository-relative paths**: Git file paths reject traversal and absolute paths; clone/worktree destinations may be absolute but may not begin with `-`
 - **GitHub numbers**: PR and issue numbers must be positive safe integers
 - **Per-command timeout**: All commands have a configurable 10-minute timeout via `AbortSignal`

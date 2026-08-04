@@ -333,6 +333,54 @@ export function validateSearchQuery(query: string, field = "query"): string {
 	return query;
 }
 
+// ---------------------------------------------------------------------------
+// Action-Scoped Parameter Validation
+// ---------------------------------------------------------------------------
+
+/**
+ * Reject parameters that are not valid for the requested action.
+ *
+ * Tools with an `action` parameter must not silently ignore params that only
+ * apply to other actions: a model that passes `title` with action='close'
+ * would otherwise believe the title was set. Each tool declares a small
+ * `Record<action, param names>` table co-located with its schema and calls
+ * this helper first thing in execute(), before any side effects.
+ *
+ * The `action` key itself is always accepted. Parameters that are present
+ * but `undefined` are not flagged (schema-optional params arrive as
+ * undefined when omitted). The error lists every offending parameter with
+ * the actions that DO accept it, so the model can self-correct.
+ */
+export function assertParamsValidForAction(
+	tool: string,
+	action: string,
+	params: object,
+	validForAction: Readonly<Record<string, readonly string[]>>,
+): void {
+	const valid = validForAction[action] ?? [];
+	const ignored = Object.keys(params).filter(
+		(key) =>
+			key !== "action" &&
+			(params as Record<string, unknown>)[key] !== undefined &&
+			!valid.includes(key),
+	);
+	if (ignored.length === 0) return;
+
+	const detail = ignored.map((key) => {
+		const validActions = Object.entries(validForAction).flatMap(
+			([name, names]) => (names.includes(key) ? [name] : []),
+		);
+		const where =
+			validActions.length > 0
+				? `only valid for action(s): ${validActions.join(", ")}`
+				: "not valid for any action";
+		return `'${key}' is ${where}`;
+	});
+	throw new ValidationError(
+		`${tool}: ${detail.join("; ")} (got action='${action}')`,
+	);
+}
+
 /**
  * Validate an exclude pattern for git clean.
  *
