@@ -200,4 +200,118 @@ describe("log", () => {
 			setup.cleanup();
 		}
 	});
+
+	// ------------------------------------------------------------------
+	// decorate: ref names must render in every format. --decorate is a
+	// no-op for custom --format strings, so full/detailed bake %d into the
+	// format; oneline relies on the built-in format honoring the flag.
+	// log.decorate is forced off locally so an ambient user config cannot
+	// decorate the control cases (tests run against the real gitconfig).
+	// ------------------------------------------------------------------
+
+	function setupDecorateRepo() {
+		const setup = setupTempRepo();
+		execFileSync("git", ["config", "log.decorate", "false"], {
+			cwd: setup.repoPath,
+		});
+		return setup;
+	}
+
+	it("git_log decorate shows ref names in oneline format", async () => {
+		const setup = setupDecorateRepo();
+		try {
+			execTool.ctx = setup.ctx;
+			const result = await execTool(gitTools, "git_log", {
+				format: "oneline",
+				decorate: true,
+			});
+			assert.ok(
+				result.content[0].text.includes("(HEAD ->"),
+				"oneline + decorate shows ref names",
+			);
+		} finally {
+			execTool.ctx = ctx;
+			setup.cleanup();
+		}
+	});
+
+	it("git_log decorate shows ref names in full format", async () => {
+		const setup = setupDecorateRepo();
+		try {
+			execTool.ctx = setup.ctx;
+			const result = await execTool(gitTools, "git_log", {
+				format: "full",
+				decorate: true,
+			});
+			assert.ok(
+				result.content[0].text.split("\n")[0].includes("(HEAD ->"),
+				"full + decorate puts ref names on the subject line",
+			);
+		} finally {
+			execTool.ctx = ctx;
+			setup.cleanup();
+		}
+	});
+
+	it("git_log decorate shows ref names in detailed format", async () => {
+		const setup = setupDecorateRepo();
+		try {
+			execTool.ctx = setup.ctx;
+			const result = await execTool(gitTools, "git_log", {
+				format: "detailed",
+				decorate: true,
+			});
+			assert.ok(
+				result.content[0].text.split("\n")[0].includes("(HEAD ->"),
+				"detailed + decorate puts ref names on the commit hash line",
+			);
+		} finally {
+			execTool.ctx = ctx;
+			setup.cleanup();
+		}
+	});
+
+	it("git_log full with decorate and --graph still counts commits", async () => {
+		const setup = setupMergeRepo();
+		try {
+			execTool.ctx = { cwd: setup.repoPath };
+			const result = await execTool(gitTools, "git_log", {
+				format: "full",
+				graph: true,
+				decorate: true,
+			});
+			assert.equal(result.details?.count, setup.expected);
+			assert.ok(
+				result.content[0].text.includes("(HEAD ->"),
+				"decorated merge commit shows ref names",
+			);
+		} finally {
+			execTool.ctx = ctx;
+			setup.cleanup();
+		}
+	});
+
+	it("git_log without decorate omits ref names in full/detailed", async () => {
+		const setup = setupDecorateRepo();
+		try {
+			execTool.ctx = setup.ctx;
+			const full = await execTool(gitTools, "git_log", {
+				format: "full",
+			});
+			const detailed = await execTool(gitTools, "git_log", {
+				format: "detailed",
+			});
+			assert.ok(
+				!full.content[0].text.includes("(HEAD ->"),
+				"full without decorate omits ref names",
+			);
+			assert.ok(
+				!detailed.content[0].text.includes("(HEAD ->"),
+				"detailed without decorate omits ref names",
+			);
+		} finally {
+			execTool.ctx = ctx;
+			setup.cleanup();
+		}
+	});
 });
