@@ -12,8 +12,8 @@ export function register(pi: ExtensionAPI) {
 		name: "git_add",
 		label: "Git Add",
 		description:
-			"Stage file contents to the index. Stages specific paths, or all changes with --all/--update. " +
-			"Use --intent-to-add (-N) to track new files without staging content.",
+			"Stage file contents to the index. Stages specific paths, or all changes. " +
+			"Use 'intentToAdd' to track new files without staging content.",
 		promptSnippet: "Stage files",
 		parameters: Type.Object(
 			{
@@ -25,24 +25,23 @@ export function register(pi: ExtensionAPI) {
 				all: Type.Optional(
 					Type.Boolean({
 						description:
-							"Stage all changes (--all, -A) — new, modified, and deleted files.",
+							"Stage all changes — new, modified, and deleted files.",
 					}),
 				),
 				update: Type.Optional(
 					Type.Boolean({
-						description:
-							"Stage all changes to tracked files only (--update, -u).",
+						description: "Stage all changes to tracked files only.",
 					}),
 				),
 				intentToAdd: Type.Optional(
 					Type.Boolean({
 						description:
-							"Record intent to add (--intent-to-add, -N) — track new files without staging content.",
+							"Record intent to add — track new files without staging content.",
 					}),
 				),
 				force: Type.Optional(
 					Type.Boolean({
-						description: "Force add ignored files (--force, -f).",
+						description: "Force add ignored files.",
 					}),
 				),
 			},

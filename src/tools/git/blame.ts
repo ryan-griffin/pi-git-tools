@@ -38,17 +38,17 @@ export function register(pi: ExtensionAPI) {
 				),
 				ignoreWhitespace: Type.Optional(
 					Type.Boolean({
-						description: "Ignore whitespace changes (-w).",
+						description: "Ignore whitespace changes.",
 					}),
 				),
 				detectMoves: Type.Optional(
 					Type.Boolean({
-						description: "Detect moved lines within or across files (-M).",
+						description: "Detect moved lines within or across files.",
 					}),
 				),
 				detectCopies: Type.Optional(
 					Type.Boolean({
-						description: "Detect lines moved/copied from other files (-C).",
+						description: "Detect lines moved/copied from other files.",
 					}),
 				),
 			},

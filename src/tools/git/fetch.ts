@@ -32,7 +32,7 @@ export function register(pi: ExtensionAPI) {
 				prune: Type.Optional(
 					Type.Boolean({
 						description:
-							"Prune remote-tracking branches no longer present on remote (--prune).",
+							"Prune remote-tracking branches no longer present on remote.",
 					}),
 				),
 				depth: Type.Optional(
@@ -43,25 +43,25 @@ export function register(pi: ExtensionAPI) {
 				),
 				all: Type.Optional(
 					Type.Boolean({
-						description: "Fetch from all remotes (--all).",
+						description: "Fetch from all remotes.",
 					}),
 				),
 				tags: Type.Optional(
 					Type.Boolean({
 						description:
-							"Fetch all tags from the remote (--tags). Mutually exclusive with noTags.",
+							"Fetch all tags from the remote. Mutually exclusive with noTags.",
 					}),
 				),
 				noTags: Type.Optional(
 					Type.Boolean({
 						description:
-							"Do not fetch any tags from the remote (--no-tags). Mutually exclusive with tags.",
+							"Do not fetch any tags from the remote. Mutually exclusive with tags.",
 					}),
 				),
 				unshallow: Type.Optional(
 					Type.Boolean({
 						description:
-							"Convert an existing shallow repository to a complete one (--unshallow). Cannot be combined with depth.",
+							"Convert an existing shallow repository to a complete one. Cannot be combined with depth.",
 					}),
 				),
 			},

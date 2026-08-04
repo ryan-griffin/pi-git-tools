@@ -55,7 +55,7 @@ export function register(pi: ExtensionAPI) {
 				branch: Type.Optional(
 					Type.String({
 						description:
-							"Branch name for the new worktree (for 'add'). Creates a new branch with -b. " +
+							"Branch name for the new worktree (for 'add'). Creates a new branch. " +
 							"With detach: true, treated as an existing ref for detached HEAD instead. " +
 							"Defaults to a name derived from the path.",
 					}),
@@ -68,8 +68,7 @@ export function register(pi: ExtensionAPI) {
 				),
 				force: Type.Optional(
 					Type.Boolean({
-						description:
-							"Force operation (for 'remove' or 'add' with --force).",
+						description: "Force operation (for 'remove' or 'add').",
 					}),
 				),
 			},

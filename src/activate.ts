@@ -45,8 +45,7 @@ export interface ActivateToolDetails {
 export const TOOL_CATALOG: ToolCatalogEntry[] = [
 	{
 		name: "git_apply",
-		summary:
-			"Apply a unified diff/patch (--3way, --reverse, --check, --cached)",
+		summary: "Apply a unified diff/patch (threeway, reverse, check, cached)",
 		group: "git-advanced",
 	},
 	{
@@ -61,12 +60,14 @@ export const TOOL_CATALOG: ToolCatalogEntry[] = [
 	},
 	{
 		name: "git_clean",
-		summary: "Remove untracked files (dry-run, force, directories, exclude)",
+		summary:
+			"Remove untracked files (dryRun, force, directories, excludePattern)",
 		group: "git-advanced",
 	},
 	{
 		name: "git_clone",
-		summary: "Clone a repository (depth, branch, filter, submodules)",
+		summary:
+			"Clone a repository (branch, depth, singleBranch, filter, recurseSubmodules)",
 		group: "git-advanced",
 	},
 	{
@@ -78,7 +79,7 @@ export const TOOL_CATALOG: ToolCatalogEntry[] = [
 	{
 		name: "git_init",
 		summary:
-			"Initialize a repository (bare, initial branch, object/ref format)",
+			"Initialize a repository (bare, initialBranch, objectFormat, refFormat)",
 		group: "git-advanced",
 	},
 	{
@@ -121,7 +122,7 @@ export const TOOL_CATALOG: ToolCatalogEntry[] = [
 	{
 		name: "gh_api",
 		summary:
-			"Call any GitHub REST endpoint (method, data, params, field, paginate, silent)",
+			"Call any GitHub REST endpoint (method, data, params, field, paginate)",
 		group: "gh",
 	},
 	{

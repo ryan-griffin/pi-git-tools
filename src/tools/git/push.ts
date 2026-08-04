@@ -31,7 +31,7 @@ export function register(pi: ExtensionAPI) {
 				),
 				setUpstream: Type.Optional(
 					Type.Boolean({
-						description: "Set the upstream tracking reference (-u).",
+						description: "Set the upstream tracking reference.",
 					}),
 				),
 				force: Type.Optional(
@@ -61,19 +61,18 @@ export function register(pi: ExtensionAPI) {
 				),
 				tags: Type.Optional(
 					Type.Boolean({
-						description: "Push all tags (--tags).",
+						description: "Push all tags.",
 					}),
 				),
 				followTags: Type.Optional(
 					Type.Boolean({
-						description:
-							"Push missing tags reachable from pushed commits (--follow-tags).",
+						description: "Push missing tags reachable from pushed commits.",
 					}),
 				),
 				forceIfIncludes: Type.Optional(
 					Type.Boolean({
 						description:
-							"Force push only if the remote ref is an ancestor of the local ref (--force-if-includes).",
+							"Force push only if the remote ref is an ancestor of the local ref.",
 					}),
 				),
 			},

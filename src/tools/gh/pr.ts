@@ -137,7 +137,7 @@ export function register(pi: ExtensionAPI) {
 				fill: Type.Optional(
 					Type.Boolean({
 						description:
-							"For 'create': derive title/body from the commits (--fill). Cannot be combined with 'title' or 'body'.",
+							"For 'create': derive title/body from the commits. Cannot be combined with 'title' or 'body'.",
 					}),
 				),
 				head: Type.Optional(
@@ -205,8 +205,7 @@ export function register(pi: ExtensionAPI) {
 				),
 				deleteBranch: Type.Optional(
 					Type.Boolean({
-						description:
-							"For 'merge': delete the head branch after merging (--delete-branch).",
+						description: "For 'merge': delete the head branch after merging.",
 					}),
 				),
 				reviewEvent: Type.Optional(
@@ -229,7 +228,7 @@ export function register(pi: ExtensionAPI) {
 				),
 				undo: Type.Optional(
 					Type.Boolean({
-						description: "For 'ready': convert PR back to draft (--undo).",
+						description: "For 'ready': convert PR back to draft.",
 					}),
 				),
 			},

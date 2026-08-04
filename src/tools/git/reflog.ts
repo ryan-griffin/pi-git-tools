@@ -36,13 +36,13 @@ export function register(pi: ExtensionAPI) {
 				),
 				all: Type.Optional(
 					Type.Boolean({
-						description: "Show reflogs of all refs (--all).",
+						description: "Show reflogs of all refs.",
 					}),
 				),
 				format: Type.Optional(
 					Type.String({
 						description:
-							"Optional --format for each entry (git log placeholders, e.g. '%h %gd %gs'). Default: git's own reflog format.",
+							"Format string for each entry (git log placeholders, e.g. '%h %gd %gs'). Default: git's own reflog format.",
 					}),
 				),
 			},

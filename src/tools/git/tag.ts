@@ -63,18 +63,18 @@ export function register(pi: ExtensionAPI) {
 				force: Type.Optional(
 					Type.Boolean({
 						description:
-							"Force-create the tag over an existing one (-f). Only for 'create' action.",
+							"Force-create the tag over an existing one. Only for 'create' action.",
 					}),
 				),
 				sign: Type.Optional(
 					Type.Boolean({
-						description: "GPG-sign the tag (-s). Only for 'create' action.",
+						description: "GPG-sign the tag. Only for 'create' action.",
 					}),
 				),
 				listPattern: Type.Optional(
 					Type.String({
 						description:
-							"Only list tags matching this pattern (-l, e.g. 'v2.*'). For 'list' action.",
+							"Only list tags matching this pattern (e.g. 'v2.*'). For 'list' action.",
 					}),
 				),
 			},

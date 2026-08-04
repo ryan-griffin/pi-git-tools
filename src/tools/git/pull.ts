@@ -43,19 +43,19 @@ export function register(pi: ExtensionAPI) {
 				autostash: Type.Optional(
 					Type.Boolean({
 						description:
-							"Automatically stash and pop local changes before/after pull (--autostash).",
+							"Automatically stash and pop local changes before/after pull.",
 					}),
 				),
 				noFF: Type.Optional(
 					Type.Boolean({
 						description:
-							"Create a merge commit even if fast-forward is possible (--no-ff).",
+							"Create a merge commit even if fast-forward is possible.",
 					}),
 				),
 				squash: Type.Optional(
 					Type.Boolean({
 						description:
-							"Squash pulled commits into a single commit (--squash). Only stages changes — you must commit afterwards.",
+							"Squash pulled commits into a single commit. Only stages changes — you must commit afterwards.",
 					}),
 				),
 			},

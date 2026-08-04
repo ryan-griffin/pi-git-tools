@@ -12,8 +12,8 @@ export function register(pi: ExtensionAPI) {
 		name: "git_diff",
 		label: "Git Diff",
 		description:
-			"Show the diff of changes — unstaged changes by default, or staged changes with --staged. " +
-			"Supports optional path filtering, --stat, --name-only, and --word-diff. " +
+			"Show the diff of changes — unstaged changes by default, or staged changes. " +
+			"Supports optional path filtering, diffstat and name-only summaries, and word-level diffs. " +
 			"Pass 'ref' to diff against a commit, or a range like 'main...HEAD'.",
 		promptSnippet: "Show file changes",
 		parameters: Type.Object(
@@ -21,7 +21,7 @@ export function register(pi: ExtensionAPI) {
 				staged: Type.Optional(
 					Type.Boolean({
 						description:
-							"Show staged changes (--cached) instead of unstaged changes. " +
+							"Show staged changes instead of unstaged changes. " +
 							"Can be combined with 'ref' to compare the index against a commit.",
 					}),
 				),
@@ -52,19 +52,17 @@ export function register(pi: ExtensionAPI) {
 				),
 				stat: Type.Optional(
 					Type.Boolean({
-						description:
-							"Show diffstat summary instead of the full patch (--stat).",
+						description: "Show diffstat summary instead of the full patch.",
 					}),
 				),
 				nameOnly: Type.Optional(
 					Type.Boolean({
-						description: "Show only names of changed files (--name-only).",
+						description: "Show only names of changed files.",
 					}),
 				),
 				wordDiff: Type.Optional(
 					Type.Boolean({
-						description:
-							"Show word-level changes instead of line-level (--word-diff).",
+						description: "Show word-level changes instead of line-level.",
 					}),
 				),
 			},

@@ -51,13 +51,12 @@ export function register(pi: ExtensionAPI) {
 				interactive: Type.Optional(
 					Type.Boolean({
 						description:
-							"Use interactive rebase (-i). Not supported headlessly — will error if true.",
+							"Use interactive rebase. Not supported headlessly — will error if true.",
 					}),
 				),
 				autosquash: Type.Optional(
 					Type.Boolean({
-						description:
-							"Automatically squash fixup/squash commits (--autosquash).",
+						description: "Automatically squash fixup/squash commits.",
 					}),
 				),
 			},

@@ -13,7 +13,7 @@ export function register(pi: ExtensionAPI) {
 		label: "Git Restore",
 		description:
 			"Restore working tree files or the index. Can restore from the index (default), " +
-			"a specific commit via --source, or during merge conflicts with --ours/--theirs.",
+			"a specific commit via 'source', or during merge conflicts with 'ours'/'theirs'.",
 		promptSnippet: "Restore file(s)",
 		parameters: Type.Object(
 			{
@@ -30,14 +30,14 @@ export function register(pi: ExtensionAPI) {
 					Type.String({
 						description:
 							"Tree-ish to restore from (e.g. 'HEAD~1', 'abc123'). Defaults to the index when omitted. " +
-							"Cannot be combined with --ours/--theirs.",
+							"Cannot be combined with 'ours'/'theirs'.",
 					}),
 				),
 				staged: Type.Optional(
 					Type.Boolean({
 						description:
 							"Restore the index (unstage). Default: false. " +
-							"When false (and --worktree is also false), git defaults to --worktree.",
+							"When false (and 'worktree' is also false), the working tree is restored instead.",
 					}),
 				),
 				worktree: Type.Optional(
@@ -50,31 +50,30 @@ export function register(pi: ExtensionAPI) {
 				ours: Type.Optional(
 					Type.Boolean({
 						description:
-							"For conflicted files: restore our side. Cannot be combined with --theirs or --source.",
+							"For conflicted files: restore our side. Cannot be combined with 'theirs' or 'source'.",
 					}),
 				),
 				theirs: Type.Optional(
 					Type.Boolean({
 						description:
-							"For conflicted files: restore their side. Cannot be combined with --ours or --source.",
+							"For conflicted files: restore their side. Cannot be combined with 'ours' or 'source'.",
 					}),
 				),
 				ignoreUnmerged: Type.Optional(
 					Type.Boolean({
 						description:
-							"Skip unmerged entries (--ignore-unmerged). Useful when restoring untracked or modified files during a merge.",
+							"Skip unmerged entries. Useful when restoring untracked or modified files during a merge.",
 					}),
 				),
 				recurseSubmodules: Type.Optional(
 					Type.Boolean({
-						description:
-							"Restore submodules recursively (--recurse-submodules).",
+						description: "Restore submodules recursively.",
 					}),
 				),
 				overlay: Type.Optional(
 					Type.Boolean({
 						description:
-							"Overlay mode (git 2.38+). Pass false to remove files not present in the source (--no-overlay). " +
+							"Overlay mode (git 2.38+). Pass false to remove files not present in the source. " +
 							"Default: true (files not in source are left untouched).",
 					}),
 				),
