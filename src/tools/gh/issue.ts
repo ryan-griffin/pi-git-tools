@@ -146,7 +146,9 @@ export function register(pi: ExtensionAPI) {
 			) {
 				throw new Error("'number' must be a positive integer.");
 			}
-			const root = await findRepoRootBestEffort(cwd, _signal);
+			// Keep the caller's cwd when it is outside a Git repository so gh does
+			// not silently fall back to the host process directory.
+			const root = (await findRepoRootBestEffort(cwd, _signal)) ?? cwd;
 			await requireGh(root, _signal);
 			const repo = await resolveRepo(params.repo, root, _signal);
 
