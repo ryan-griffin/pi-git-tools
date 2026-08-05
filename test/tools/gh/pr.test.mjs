@@ -2,6 +2,8 @@
  * pi-git-tools — gh_pr validation tests.
  */
 import { before, describe, it } from "node:test";
+
+import { Value } from "typebox/value";
 import { assert, captureTools, execTool } from "../../helpers.mjs";
 
 const { registerGhTools } = await import("../../../src/gh-tools.ts");
@@ -57,19 +59,15 @@ describe("gh_pr", () => {
 		);
 	});
 
-	it("accepts valid PR number 1", async () => {
-		try {
-			await execTool(ghTools, "gh_pr", {
+	it("accepts a positive PR number in the schema", () => {
+		assert.equal(
+			Value.Check(ghTools.get("gh_pr").parameters, {
 				action: "view",
 				repo: "test/repo",
 				number: 1,
-			});
-		} catch (err) {
-			assert.ok(
-				!err.message.includes("positive integer"),
-				"should not fail number validation",
-			);
-		}
+			}),
+			true,
+		);
 	});
 
 	it("gh_pr create requires title unless fill", async () => {

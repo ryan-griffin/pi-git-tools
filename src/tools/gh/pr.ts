@@ -4,7 +4,7 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import { registerTool } from "../../truncate.js";
-import { resolveCwd, run } from "../../utils.js";
+import { CommandError, resolveCwd, run } from "../../utils.js";
 import {
 	assertParamsValidForAction,
 	validateBranchName,
@@ -684,7 +684,25 @@ export function register(pi: ExtensionAPI) {
 						"--json",
 						"name,state,bucket,startedAt,completedAt,link",
 					];
-					const output = await run("gh", args, root, undefined, _signal);
+					let output: string;
+					let pending = false;
+					try {
+						output = await run("gh", args, root, undefined, _signal);
+					} catch (err: unknown) {
+						// gh uses exit code 8 to signal pending checks while still
+						// returning the JSON snapshot on stdout. Preserve all other
+						// command failures, including timeouts and cancellations.
+						if (
+							err instanceof CommandError &&
+							err.exitCode === 8 &&
+							err.stdout.trim()
+						) {
+							output = err.stdout;
+							pending = true;
+						} else {
+							throw err;
+						}
+					}
 					let text = output;
 					try {
 						const parsedChecks: unknown = JSON.parse(output);
@@ -710,6 +728,7 @@ export function register(pi: ExtensionAPI) {
 							repo,
 							number: params.number,
 							action: "checks",
+							pending,
 						},
 					};
 				}
