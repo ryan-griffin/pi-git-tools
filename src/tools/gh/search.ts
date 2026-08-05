@@ -209,7 +209,9 @@ export function register(pi: ExtensionAPI) {
 		),
 		async execute(_callId, params, _signal, _onUpdate, ctx) {
 			const cwd = resolveCwd(ctx);
-			const root = await findRepoRootBestEffort(cwd, _signal);
+			// Keep the caller's cwd when it is outside a Git repository so gh does
+			// not silently fall back to the host process directory.
+			const root = (await findRepoRootBestEffort(cwd, _signal)) ?? cwd;
 			await requireGh(root, _signal);
 
 			const searchType = params.type || "repos";
